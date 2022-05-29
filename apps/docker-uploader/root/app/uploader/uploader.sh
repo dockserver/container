@@ -101,8 +101,10 @@ if test -f ${CSV} ; then
    ARRAY=$(ls ${KEYLOCAL} | wc -l )
    USED=$(( $RANDOM % ${ARRAY} + 1 ))
 
-   $(which cat) ${CSV} | grep -E ${DIR} | sed '/^\s*#.*$/d'| while IFS=$'|' read -ra myArray; do
-   if [[ ${myArray[2]} == "" && ${myArray[3]} == "" ]]; then
+   ### TEST IS FOLDER AND CSV CORRECT ####
+   if [[ $(which cat) ${CSV} | grep -E ${DIR}) == ${DIR} ]]; then
+      $(which cat) ${CSV} | grep -E ${DIR} | sed '/^\s*#.*$/d'| while IFS=$'|' read -ra myArray; do
+      if [[ ${myArray[2]} == "" && ${myArray[3]} == "" ]]; then
 ### UNENCRYPTED RCLONE.CONF ####
 cat > ${ENDCONFIG} << EOF; $(echo)
 ## CUSTOM RCLONE.CONF for ${FILE}
@@ -132,8 +134,9 @@ directory_name_encryption = true
 password = ${myArray[2]}
 password2 = ${myArray[3]}
 EOF
+      fi
+      done
    fi
-   done
 fi
 }
 
