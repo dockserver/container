@@ -241,6 +241,8 @@ function rcloneupload() {
       #### MAKE FOLDER ON CORRECT DRIVE #### 
       $(which rclone) mkdir "${KEY}$[USED]${CRYPTED}:/${DIR}/" --config="${CONFIG}"
    fi
+   #### GENERATE FOR EACH UPLOAD A NRW AGENT ####
+   USERAGENT=$($(which cat) /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
    #### START TIME UPLOAD ####
    STARTZ=$(date +%s)
    #### RUN RCLONE UPLOAD COMMAND ####
@@ -331,8 +333,9 @@ function transfercheck() {
 
 function rclonedown() {
    source /system/uploader/uploader.env
+   CHECKFILES=$($(which cat) ${CHK} | wc -l)
    #### SHUTDOWN UPLOAD LOOP WHEN TP UPLOAD IS LESS THEN "${TRANSFERS}" ####
-   if [[ `$(which cat) ${CHK} | wc -l` -eq "${TRANSFERS}" ]]; then
+   if [[ "${CHECKFILES}" -eq "${TRANSFERS}" ]]; then
       $(which rm) -rf "${CHK}" "${LOGFILE}/${FILE}.txt" "${START}/${FILE}.json" && \
       $(which chown) abc:abc -R "${DONE}/${FILE}.json" &>/dev/null && \
       $(which chmod) 755 -R "${DONE}" &>/dev/null
