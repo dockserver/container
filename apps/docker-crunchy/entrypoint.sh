@@ -47,12 +47,11 @@ FINAL=/mnt/downloads/crunchy
 
 ### SETTING FOR LANGUAGE  ###
 LANGUAGESET=${LANGUAGESET}
-if [[ ! -z "${LANGUAGESET}" ]];then
+if [[ ! "${LANGUAGESET}" ]];then
    LANGUAGESET=en-US
 fi
-
 LANGUAGETAG=${LANGUAGETAG}
-if [[ ! -z "${LANGUAGESET}" ]];then
+if [[ ! "${LANGUAGESET}" ]];then
    LANGUAGESET=ENGLISH
 fi
 
