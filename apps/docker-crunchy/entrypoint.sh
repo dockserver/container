@@ -34,7 +34,6 @@ $(which wget) https://github.com/ByteDream/crunchyroll-go/releases/download/${VE
 $(which chmod) a+x /app/crunchy/crunchy && \
 $(which chmod) 777 /app/crunchy/crunchy
 
-
 ### RUN LOGIN ###
 echo "---> login into crunchyroll as ${EMAIL} with ${PASSWORD} <---"
 /app/crunchy/crunchy login ${EMAIL} ${PASSWORD} --persistent  &>/dev/null
@@ -49,14 +48,12 @@ FINAL=/mnt/downloads/crunchy
 ### SETTING FOR LANGUAGE  ###
 LANGUAGE=${LANGUAGESET}
 if [[ ${LANGUAGESET} == de ]];then
-   LANGUAGE=de-DE
-   TAG=GERMAN
+   export LANGUAGE=de-DE
+   export TAG=GERMAN
 else
-   LANGUAGE=en-EN
-   TAG=ENGLISH
+   export LANGUAGE=en-EN
+   export TAG=ENGLISH
 fi
-
-
 
 #### RUN LOOP ####
 
