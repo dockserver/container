@@ -38,6 +38,8 @@ if [[ -f "/app/crunchy/crunchy" ]]; then
    $(which rm) -rf /app/crunchy/crunchy &>/dev/null
 fi
 
+$(which rm) /config/log/*
+
 ### GET LATEST VERSION ###
 echo "**** Install requirements ****" && \
   VERSION=$(curl -sX GET "https://api.github.com/repos/ByteDream/crunchyroll-go/releases/latest" | jq --raw-output '.tag_name')
@@ -51,10 +53,13 @@ echo "**** login into crunchyroll as ${EMAIL} with ${PASSWORD} ****"
 
 ### READ TO DOWNLOAD FILE ###
 CHK=/config/download.txt
-### TEMP DOWNLOAD LOCATION ###
-TMP=/app/downloads
 ### FINAL FOLDER ###
 FINAL=/mnt/downloads/crunchy
+
+## REMOVE OLD FOLDERS ##
+if [[ -d /app/downloads ]];then
+    $(which rm) -rf /app/downloads
+fi
 
 ### SETTING FOR LANGUAGE  ###
 LANGUAGESET=${LANGUAGESET}
@@ -88,7 +93,7 @@ while true ; do
         $(which sed) -i 1d "${CHK}"
         ### CREATE FOLDER ###
         ### sample : .../tv or movie/show or movie name/filename....
-        $(which mkdir) -p ${TMP}/${SHOWLINK[0]}/${SHOWLINK[1]} &>/dev/null
+        $(which mkdir) -p ${FINAL}/${SHOWLINK[0]}/${SHOWLINK[1]} &>/dev/null
         $(which touch) /config/log/${SHOWLINK[1]}
         if [[ "${SHOWLINK[0]}" == tv ]]; then
 
@@ -96,7 +101,7 @@ while true ; do
            /app/crunchy/crunchy archive \
            --resolution best \
            --language ${LANGUAGESET} \
-           --directory ${TMP}/${SHOWLINK[0]}/${SHOWLINK[1]} \
+           --directory ${FINAL}/${SHOWLINK[0]}/${SHOWLINK[1]} \
            --merge auto \
            --goroutines 8 \
            --output "{series_name}.S{season_number}E{episode_number}.{title}.${LANGUAGETAG}.DL.DUBBED.{resolution}.WebHD.AAC.H264-dockserver.mkv" \
@@ -109,7 +114,7 @@ while true ; do
              /app/crunchy/crunchy archive \
              --resolution best \
              --language ${LANGUAGESET} \
-             --directory ${TMP}/${SHOWLINK[0]}/${SHOWLINK[1]} \
+             --directory ${FINAL}/${SHOWLINK[0]}/${SHOWLINK[1]} \
              --merge auto \
              --goroutines 8 \
              --output "{series_name}.{title}.${LANGUAGETAG}.DL.DUBBED.{resolution}.WebHD.AAC.H264-dockserver.mkv" \
@@ -131,16 +136,16 @@ while true ; do
          echo "**** rename now ${SHOWLINK[1]} into ${SHOWLINK[0]} *****"
 
          ### FIRST RENAME ###
-         if [[ -d "${TMP}/${SHOWLINK[0]}/${SHOWLINK[1]}" ]]; then
-            for f in ${TMP}/${SHOWLINK[0]}/*/*; do
+         if [[ -d "${FINAL}/${SHOWLINK[0]}/${SHOWLINK[1]}" ]]; then
+            for f in ${FINAL}/${SHOWLINK[0]}/*/*; do
                 ### REPLACE EMPTY SPACES WITH DOTS ####
                 $(which mv) "$f" "${f// /.}" &>/dev/null
              done
          fi
 
-         if [[ -d "${TMP}/${SHOWLINK[0]}/${SHOWLINK[1]}" ]]; then
+         if [[ -d "${FINAL}/${SHOWLINK[0]}/${SHOWLINK[1]}" ]]; then
             ### SECONDARY RENAME ###
-            for f in ${TMP}/${SHOWLINK[0]}/${SHOWLINK[1]}/*; do
+            for f in ${FINAL}/${SHOWLINK[0]}/${SHOWLINK[1]}/*; do
                 ### REMOVE CC FORMAT ###
                 $(which mv) "$f" "${f//1920x1080/1080p}" &>/dev/null
                 $(which mv) "$f" "${f//1280x720/720p}" &>/dev/null
@@ -150,13 +155,9 @@ while true ; do
             echo "**** rename completely ${SHOWLINK[1]} into ${SHOWLINK[0]} ****"
          fi
          sleep 5 && \
-         echo "**** moving now ${SHOWLINK[1]} into ${SHOWLINK[0]} *****"
-         ### MOVE ALL FILES FOR THE ARRS ###
-         $(which mkdir) -p ${FINAL}/${SHOWLINK[0]}/${SHOWLINK[1]} &>/dev/null
-         ### moved to rsync ###
-         $(which rsync) --remove-source-files -aqhv ${TMP}/${SHOWLINK[0]}/ ${FINAL}/${SHOWLINK[0]}/ &>/dev/null
-         $(which chown) -cR 1000:1000 ${FINAL}/${SHOWLINK[0]}/${SHOWLINK[1]} &>/dev/null
-         $(which find) ${TMP}/${SHOWLINK[0]} -type d -empty -delete &>/dev/null
+         echo "**** moving now ${SHOWLINK[1]} into ${SHOWLINK[0]} *****" && \
+           $(which chown) -cR 1000:1000 ${FINAL}/${SHOWLINK[0]}/${SHOWLINK[1]} &>/dev/null && \
+             $(which find) ${FINAL}/${SHOWLINK[0]} -type d -empty -delete &>/dev/null && \
          echo "**** moving completely ${SHOWLINK[1]} into ${SHOWLINK[0]} ****"
       done
   else
