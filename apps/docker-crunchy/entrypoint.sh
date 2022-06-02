@@ -77,26 +77,20 @@ export LANGUAGETAG=${LANGUAGETAG}
 echo "**** LANGUAGESET is set to ${LANGUAGESET} ****" && \
   echo "**** LANGUAGETAG is set to ${LANGUAGETAG} ****"
 
-sleep 5
-
+sleep 2
 ###ar-SA, de-DE, en-US, es-419, es-ES, fr-FR, it-IT, ja-JP, pt-BR, pt-PT, ru-RU
 
 #### RUN LOOP ####
-
 while true ; do
   CHECK=$($(which cat) ${CHK} | wc -l)
   if [ "${CHECK}" -gt 0 ]; then
      ### READ FROM FILE AND PARSE ###
      $(which cat) "${CHK}" | head -n 1 | while IFS=$'|' read -ra SHOWLINK ; do
-
         echo "**** downloading now ${SHOWLINK[1]} into ${SHOWLINK[0]} ****"
         $(which sed) -i 1d "${CHK}"
-        ### CREATE FOLDER ###
-        ### sample : .../tv or movie/show or movie name/filename....
-        $(which mkdir) -p ${FINAL}/${SHOWLINK[0]}/${SHOWLINK[1]} &>/dev/null
-        $(which touch) /config/log/${SHOWLINK[1]}
         if [[ "${SHOWLINK[0]}" == tv ]]; then
-
+           $(which mkdir) -p ${FINAL}/${SHOWLINK[0]}/${SHOWLINK[1]} &>/dev/null
+           $(which touch) /config/log/${SHOWLINK[1]}
            ### DOWNLOAD SHOW ###
            /app/crunchy/crunchy archive \
            --resolution best \
@@ -106,10 +100,9 @@ while true ; do
            --goroutines 8 \
            --output "{series_name}.S{season_number}E{episode_number}.{title}.${LANGUAGETAG}.DL.DUBBED.{resolution}.WebHD.AAC.H264-dockserver.mkv" \
            https://www.crunchyroll.com/${SHOWLINK[1]} > /config/log/${SHOWLINK[1]}
-           retVal=$?
-
         elif [[ "${SHOWLINK[0]}" == movie ]]; then
-
+             $(which mkdir) -p ${FINAL}/${SHOWLINK[0]}/${SHOWLINK[1]} &>/dev/null
+             $(which touch) /config/log/${SHOWLINK[1]}
              ### DOWNLOAD MOVIE ###
              /app/crunchy/crunchy archive \
              --resolution best \
@@ -119,46 +112,30 @@ while true ; do
              --goroutines 8 \
              --output "{series_name}.{title}.${LANGUAGETAG}.DL.DUBBED.{resolution}.WebHD.AAC.H264-dockserver.mkv" \
              https://www.crunchyroll.com/${SHOWLINK[1]} > /config/log/${SHOWLINK[1]}
-             retVal=$?
-
          else
              $(which sed) -i 1d "${CHK}" && break
          fi
-
-         if [ $retVal -ne 0 ]; then
+         if [ $? -ne 0 ]; then
             echo "**** ERROR --- DOWNLOAD FAILED ****" && break
          else
             $(which rm) -rf /config/log/${SHOWLINK[1]}
          fi
-
          echo "**** downloading complete ${SHOWLINK[1]} into ${SHOWLINK[0]} ****" && \
-         sleep 5 && \
          echo "**** rename now ${SHOWLINK[1]} into ${SHOWLINK[0]} *****"
-
-         ### FIRST RENAME ###
-         if [[ -d "${FINAL}/${SHOWLINK[0]}/${SHOWLINK[1]}" ]]; then
-            for f in ${FINAL}/${SHOWLINK[0]}/*/*; do
-                ### REPLACE EMPTY SPACES WITH DOTS ####
-                $(which mv) "$f" "${f// /.}" &>/dev/null
-             done
-         fi
-
-         if [[ -d "${FINAL}/${SHOWLINK[0]}/${SHOWLINK[1]}" ]]; then
-            ### SECONDARY RENAME ###
-            for f in ${FINAL}/${SHOWLINK[0]}/${SHOWLINK[1]}/*; do
-                ### REMOVE CC FORMAT ###
-                $(which mv) "$f" "${f//1920x1080/1080p}" &>/dev/null
-                $(which mv) "$f" "${f//1280x720/720p}" &>/dev/null
-                $(which mv) "$f" "${f//640x480/SD}" &>/dev/null
-                $(which mv) "$f" "${f//480x360/SD}" &>/dev/null
-            done
-            echo "**** rename completely ${SHOWLINK[1]} into ${SHOWLINK[0]} ****"
-         fi
-         sleep 5 && \
-         echo "**** moving now ${SHOWLINK[1]} into ${SHOWLINK[0]} *****" && \
+         for f in ${FINAL}/${SHOWLINK[0]}/${SHOWLINK[1]}/*; do
+             $(which mv) "$f" "${f// /.}" &>/dev/null
+         done
+         for f in ${FINAL}/${SHOWLINK[0]}/${SHOWLINK[1]}/*; do
+             ### REMOVE CC FORMAT ###
+             $(which mv) "$f" "${f//1920x1080/1080p}" &>/dev/null
+             $(which mv) "$f" "${f//1280x720/720p}" &>/dev/null
+             $(which mv) "$f" "${f//640x480/SD}" &>/dev/null
+             $(which mv) "$f" "${f//480x360/SD}" &>/dev/null
+         done
+         echo "**** rename completely ${SHOWLINK[1]} into ${SHOWLINK[0]} ****"
+         echo "**** setting permissions now ${SHOWLINK[1]} into ${SHOWLINK[0]} *****" && \
            $(which chown) -cR 1000:1000 ${FINAL}/${SHOWLINK[0]}/${SHOWLINK[1]} &>/dev/null && \
-             $(which find) ${FINAL}/${SHOWLINK[0]} -type d -empty -delete &>/dev/null && \
-         echo "**** moving completely ${SHOWLINK[1]} into ${SHOWLINK[0]} ****"
+         echo "**** setting permissions completely ${SHOWLINK[1]} into ${SHOWLINK[0]} ****"
       done
   else
       echo "**** nothing to download yet ****" && \
