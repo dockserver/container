@@ -96,7 +96,7 @@ while true ; do
            --resolution best \
            --language ${LANGUAGESET} \
            --directory ${FINAL}/${SHOWLINK[0]}/${SHOWLINK[1]} \
-           --merge auto \
+           --merge video \
            --goroutines 8 \
            --output "{series_name}.S{season_number}E{episode_number}.{title}.${LANGUAGETAG}.DL.DUBBED.{resolution}.WebHD.AAC.H264-dockserver.mkv" \
            https://www.crunchyroll.com/${SHOWLINK[1]} > /config/log/${SHOWLINK[1]}
@@ -108,7 +108,7 @@ while true ; do
              --resolution best \
              --language ${LANGUAGESET} \
              --directory ${FINAL}/${SHOWLINK[0]}/${SHOWLINK[1]} \
-             --merge auto \
+             --merge video \
              --goroutines 8 \
              --output "{series_name}.{title}.${LANGUAGETAG}.DL.DUBBED.{resolution}.WebHD.AAC.H264-dockserver.mkv" \
              https://www.crunchyroll.com/${SHOWLINK[1]} > /config/log/${SHOWLINK[1]}
