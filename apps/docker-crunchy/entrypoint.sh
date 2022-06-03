@@ -99,7 +99,7 @@ while true ; do
            --merge video \
            --goroutines 8 \
            --output "{series_name}.S{season_number}E{episode_number}.{title}.${LANGUAGETAG}.DL.DUBBED.{resolution}.WebHD.AAC.H264-dockserver.mkv" \
-           https://www.crunchyroll.com/${SHOWLINK[1]} > /config/log/${SHOWLINK[1]}
+           ${SHOWLINK[2]} > /config/log/${SHOWLINK[1]}
         elif [[ "${SHOWLINK[0]}" == movie ]]; then
              $(which mkdir) -p ${FINAL}/${SHOWLINK[0]}/${SHOWLINK[1]} &>/dev/null
              $(which touch) /config/log/${SHOWLINK[1]}
@@ -111,7 +111,7 @@ while true ; do
              --merge video \
              --goroutines 8 \
              --output "{series_name}.{title}.${LANGUAGETAG}.DL.DUBBED.{resolution}.WebHD.AAC.H264-dockserver.mkv" \
-             https://www.crunchyroll.com/${SHOWLINK[1]} > /config/log/${SHOWLINK[1]}
+             ${SHOWLINK[2]} > /config/log/${SHOWLINK[1]}
          else
              $(which sed) -i 1d "${CHK}" && break
          fi
