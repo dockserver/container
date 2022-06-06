@@ -29,8 +29,7 @@ $(which echo) "**** install packages ****" && \
 
 while true; do
    if [[ ! -f /config/download.txt ]];then
-      $(which echo) "**** NO download.txt found ****" && \
-      reloop && break
+      $(which echo) "**** NO download.txt found ****" && break
    else
       break
    fi
@@ -51,48 +50,35 @@ function reloop() {
      echo "tv|${SHOWLINK}" >> "${CHK}"
   done
 }
+## LOGIN 
+./aniDL --username ${EMAIL} --password ${PASSWORD} --service ${SERVICE}
 
-
-while true ; do
+While true ; do
   CHECK=$($(which cat) ${CHK} | wc -l)
   if [ "${CHECK}" -gt 0 ]; then
      ### READ FROM FILE AND PARSE ###
        $(which cat) "${CHK}" | head -n 1 | while IFS=$'|' read -ra SHOWLINK ; do
-          if [[ "${SHOWLINK[0]}" == tv ]]; then
-              $(which echo) "**** downloading now ${SHOWLINK[1]} ****"
-              ./aniDL \
-              --username "${EMAIL}" --password "${PASSWORD}" \
-              --service "${SERVICE}" --series "${SHOWLINK[1]}" \
-              --videoTitle ${title} --dubLang "${DUBLANG}" \
-              --fileName ${SHOWLINK[0]}/${showTitle}.${title}.S${season}E${episode}.WEBHD.${height} \
-              --force Y --mp4 --nocleanup --skipUpdate --all
-          elif [[ "${SHOWLINK[0]}" == movie ]]; then
-              $(which echo) "**** downloading now ${SHOWLINK[1]} ****"
-              ./aniDL \
-              --username ${EMAIL} --password ${PASSWORD} --new \
-              --service ${SERVICE} --movie-listing "${SHOWLINK[1]}" \
-              --videoTitle ${title} --dubLang "${DUBLANG}" \
-              --fileName ${SHOWLINK[0]}/${title}/${showTitle}.${title}.WEBHD.${height} \
-              --force Y --mp4 --nocleanup --skipUpdate --all
-          else
-              $(which echo) "**** could not terminate what you want to load ...... atsch .... ****" 
-          fi
-          shopt -s globstar
-          for f in /videos/${SHOWLINK[0]}/**/*.mp4; do
+         ./aniDL \
+         --series "G5PHNM4K8" \
+         --videoTitle ${title} --all --dubLang "${DUBLANG}" \
+         --service "${SERVICE}" --videoTitle ${title} \
+         --force Y --mp4 --nocleanup --skipUpdate --all
+         shopt -s globstar
+         for f in /videos/${SHOWLINK[0]}/**/*.mp4; do
              $(which mv) "$f" "${f// /.}" &>/dev/null
-          done
-          $(which sed) -i 1d "${CHK}"
-          ## RUN FFMPEG TO COVENT TO MKV ###
-          shopt -s globstar
-          for f in /videos/**/*.mp4; do
+         done
+         $(which sed) -i 1d "${CHK}"
+         ## RUN FFMPEG TO COVENT TO MKV ###
+         shopt -s globstar
+         for f in /videos/**/*.mp4; do
              ## c:v/s/a >> video _ subtitle _ audio  >> copy from mp4
              $(which echo) "**** running  convert for ${f} ****" && \
              $(which ffmpeg) -nostdin -i "$f" -c:v copy -c:a copy -c:s copy "${f%.mp4}-dockserver.mkv" &>/dev/null
              $(which chown) -cR 1000:1000 "$f" &>/dev/null && \
              $(which rm) -rf "{$f}.mp4" &>/dev/null 
-          done
-          if [[ $(date +%H:%M) == "00:01" ]];then reloop ; fi
-       done
+         done
+         if [[ $(date +%H:%M) == "00:01" ]];then reloop ; fi
+      done
   else
       $(which echo) "**** nothing to download yet ****" && \
          $(which sleep) 240
