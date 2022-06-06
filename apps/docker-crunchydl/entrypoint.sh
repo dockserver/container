@@ -53,7 +53,7 @@ function reloop() {
 ## LOGIN 
 ./aniDL --username ${EMAIL} --password ${PASSWORD} --service ${SERVICE}
 
-While true ; do
+while true ; do
   CHECK=$($(which cat) ${CHK} | wc -l)
   if [ "${CHECK}" -gt 0 ]; then
      ### READ FROM FILE AND PARSE ###
