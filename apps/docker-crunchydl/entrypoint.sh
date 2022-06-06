@@ -29,7 +29,8 @@ $(which echo) "**** install packages ****" && \
 
 while true; do
    if [[ ! -f /config/download.txt ]];then
-      $(which echo) "**** NO download.txt found ****" && $(which sleep) 60
+      $(which echo) "**** NO download.txt found ****" && \
+      reloop && $(which sleep) 60
    else
       break
    fi
@@ -45,10 +46,9 @@ function reloop() {
   ## GET NEWS FILES ##
   ./aniDL \
   --username ${EMAIL} --password ${PASSWORD} \
-  --service ${SERVICE} --new > /config/neewfiles
-
+  --service ${SERVICE} --new > /config/newfiles
   cat /config/newfiles | grep -e "Season" | grep -E "Z:" | sed 's/[#$%*@]//g' | cut -d: -f2 | awk '{print $1}' | while IFS=$'|' read -ra SHOWLINK ; do
-     echo "tv|${SHOWLINK}" >> ${CHK}
+     echo "tv|${SHOWLINK}" >> "${CHK}"
   done
 }
 
