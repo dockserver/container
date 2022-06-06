@@ -30,7 +30,7 @@ $(which echo) "**** install packages ****" && \
 while true; do
    if [[ ! -f /config/download.txt ]];then
       $(which echo) "**** NO download.txt found ****" && \
-      reloop && $(which sleep) 60
+      reloop && break
    else
       break
    fi
