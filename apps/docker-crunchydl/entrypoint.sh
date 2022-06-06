@@ -58,7 +58,7 @@ while true ; do
   if [ "${CHECK}" -gt 0 ]; then
      ### READ FROM FILE AND PARSE ###
        $(which cat) "${CHK}" | head -n 1 | while IFS=$'|' read -ra SHOWLINK ; do
-         ./aniDL \
+         ./aniDL --username ${EMAIL} --password ${PASSWORD} \
          --series "${SHOWLINK[1]}" \
          --videoTitle ${title} --all --dubLang "${DUBLANG}" \
          --service "${SERVICE}" --videoTitle ${title} \
