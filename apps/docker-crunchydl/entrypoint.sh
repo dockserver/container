@@ -63,16 +63,16 @@ while true ; do
               ./aniDL \
               --username "${EMAIL}" --password "${PASSWORD}" \
               --service "${SERVICE}" --series "${SHOWLINK[1]}" \
-              --videoTitle "${title}" --dubLang "${DUBLANG}" \
-              --fileName "${SHOWLINK[0]}/${showTitle}/${showTitle}.${title}.S${season}E${episode}.WEBHD.${height}" \
+              --videoTitle ${title} --dubLang "${DUBLANG}" \
+              --fileName ${SHOWLINK[0]}/${showTitle}/${showTitle}.${title}.S${season}E${episode}.WEBHD.${height} \
               --force Y --mp4 --nocleanup --skipUpdate --all
           elif [[ "${SHOWLINK[0]}" == movie ]]; then
               $(which echo) "**** downloading now ${SHOWLINK[1]} ****"
               ./aniDL \
               --username ${EMAIL} --password ${PASSWORD} --new \
               --service ${SERVICE} --movie-listing "${SHOWLINK[1]}" \
-              --videoTitle "${title}" --dubLang "${DUBLANG}" \
-              --fileName "${SHOWLINK[0]}/${title}/${showTitle}.${title}.WEBHD.${height}" \
+              --videoTitle ${title} --dubLang "${DUBLANG}" \
+              --fileName ${SHOWLINK[0]}/${title}/${showTitle}.${title}.WEBHD.${height} \
               --force Y --mp4 --nocleanup --skipUpdate --all
           else
               $(which echo) "**** could not terminate what you want to load ...... atsch .... ****" 
