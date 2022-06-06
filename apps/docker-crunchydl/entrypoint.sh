@@ -64,7 +64,7 @@ while true ; do
               --username "${EMAIL}" --password "${PASSWORD}" \
               --service "${SERVICE}" --series "${SHOWLINK[1]}" \
               --videoTitle "${title}" --dubLang "${DUBLANG}" \
-              --fileName "${SHOWLINK[0]}/${showTitle}/${showTitle}.${title}.S${season}E${episode}.WEBHD.${height} \
+              --fileName "${SHOWLINK[0]}/${showTitle}/${showTitle}.${title}.S${season}E${episode}.WEBHD.${height}" \
               --force Y --mp4 --nocleanup --skipUpdate --all
           elif [[ "${SHOWLINK[0]}" == movie ]]; then
               $(which echo) "**** downloading now ${SHOWLINK[1]} ****"
