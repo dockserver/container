@@ -29,8 +29,7 @@ $(which echo) "**** install packages ****" && \
 
 while true; do
    if [[ ! -f /config/download.txt ]];then
-      $(which echo) "**** NO download.txt found ****" && \
-      $(which sleep) 60
+      $(which echo) "**** NO download.txt found ****" && $(which sleep) 60
    else
       break
    fi
@@ -42,6 +41,17 @@ CHK=/config/download.txt
 LOCHK=/config/to-download.txt
 
 ## RUN LOOP ##
+function reloop() {
+  ## GET NEWS FILES ##
+  ./aniDL \
+  --username ${EMAIL} --password ${PASSWORD} \
+  --service ${SERVICE} --new > /config/neewfiles
+
+  cat /config/newfiles | grep -e "Season" | grep -E "Z:" | sed 's/[#$%*@]//g' | cut -d: -f2 | awk '{print $1}' | while IFS=$'|' read -ra SHOWLINK ; do
+     echo "tv|${SHOWLINK}" >> ${CHK}
+  done
+}
+
 
 while true ; do
   CHECK=$($(which cat) ${CHK} | wc -l)
@@ -51,19 +61,19 @@ while true ; do
           if [[ "${SHOWLINK[0]}" == tv ]]; then
               $(which echo) "**** downloading now ${SHOWLINK[1]} ****"
               ./aniDL \
-              --username ${EMAIL} --password ${PASSWORD} --new \
-              --service ${SERVICE} --series ${SHOWLINK[1]} \
-              --videoTitle ${title} --dubLang ${DUBLANG} \
-              --filename=${SHOWLINK[0]}/${showTitle}/${showTitle}.${title}.S${season}E${episode}.WEBHD.${height} \
-              --force Y --mp4 --nocleanup --skipUpdate
+              --username "${EMAIL}" --password "${PASSWORD}" \
+              --service "${SERVICE}" --series "${SHOWLINK[1]}" \
+              --videoTitle "${title}" --dubLang "${DUBLANG}" \
+              --fileName "${SHOWLINK[0]}/${showTitle}/${showTitle}.${title}.S${season}E${episode}.WEBHD.${height} \
+              --force Y --mp4 --nocleanup --skipUpdate --all
           elif [[ "${SHOWLINK[0]}" == movie ]]; then
               $(which echo) "**** downloading now ${SHOWLINK[1]} ****"
               ./aniDL \
               --username ${EMAIL} --password ${PASSWORD} --new \
-              --service ${SERVICE} --movie-listing ${SHOWLINK[1]} \
-              --videoTitle ${title} --dubLang ${DUBLANG} \
-              --filename=${SHOWLINK[0]}/${title}/${showTitle}.${title}.WEBHD.${height} \
-              --force Y --mp4 --nocleanup --skipUpdate
+              --service ${SERVICE} --movie-listing "${SHOWLINK[1]}" \
+              --videoTitle "${title}" --dubLang "${DUBLANG}" \
+              --fileName "${SHOWLINK[0]}/${title}/${showTitle}.${title}.WEBHD.${height}" \
+              --force Y --mp4 --nocleanup --skipUpdate --all
           else
               $(which echo) "**** could not terminate what you want to load ...... atsch .... ****" 
           fi
@@ -71,21 +81,17 @@ while true ; do
           for f in /videos/${SHOWLINK[0]}/**/*.mp4; do
              $(which mv) "$f" "${f// /.}" &>/dev/null
           done
-          $(which cat) "${CHK}" | awk 'NR==1; END{print}' >> "${LOCHK}"
           $(which sed) -i 1d "${CHK}"
           ## RUN FFMPEG TO COVENT TO MKV ###
           shopt -s globstar
           for f in /videos/**/*.mp4; do
              ## c:v/s/a >> video _ subtitle _ audio  >> copy from mp4
              $(which echo) "**** running  convert for ${f} ****" && \
-             $(which ffmpeg) -nostdin -i "$f" -c:v copy -c:a copy -c:s copy "${f%.mp4}-dockserver.mkv" && \
+             $(which ffmpeg) -nostdin -i "$f" -c:v copy -c:a copy -c:s copy "${f%.mp4}-dockserver.mkv" &>/dev/null
              $(which chown) -cR 1000:1000 "$f" &>/dev/null && \
              $(which rm) -rf "{$f}.mp4" &>/dev/null 
           done
-          CHECK=$($(which cat) ${CHK} | wc -l)
-          if [ "${CHECK}" == 0 ]; then
-             $(which mv) "${LOCHK}" "${CHK}"
-          fi
+          if [[ $(date +%H:%M) == "00:01" ]];then reloop ; fi
        done
   else
       $(which echo) "**** nothing to download yet ****" && \
