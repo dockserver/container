@@ -59,12 +59,12 @@ while true ; do
      ### READ FROM FILE AND PARSE ###
        $(which cat) "${CHK}" | head -n 1 | while IFS=$'|' read -ra SHOWLINK ; do
          ./aniDL \
-         --series "G5PHNM4K8" \
+         --series "${SHOWLINK[1]}" \
          --videoTitle ${title} --all --dubLang "${DUBLANG}" \
          --service "${SERVICE}" --videoTitle ${title} \
          --force Y --mp4 --nocleanup --skipUpdate --all
          shopt -s globstar
-         for f in /videos/${SHOWLINK[0]}/**/*.mp4; do
+         for f in /videos/**/*.mp4; do
              $(which mv) "$f" "${f// /.}" &>/dev/null
          done
          $(which sed) -i 1d "${CHK}"
