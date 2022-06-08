@@ -1,9 +1,8 @@
 #!/usr/bin/with-contenv bash
 
-export DEBIAN_FRONTEND=noninteractive
-echo "**** update system  ****" && \
-  apt -yqq update && \
-  apt -yqq upgrade && \
+printf "**** update system  ****" && \
+  apt-get -yqq update && \
+  apt-get -yqq upgrade && \
   apt install -yqq \
      jq ocl-icd-libopencl1 udev \
      unrar wget git curl xmlstarlet \
@@ -11,7 +10,7 @@ echo "**** update system  ****" && \
      va-driver-all mesa-vulkan-drivers \
      ffmpeg
 
-  if [ "${DEBUG,,}" = "true" ]; then set -x ; fi
+if [ "${DEBUG,,}" = "true" ]; then set -x ; fi
 
 PLEX_MEDIA_SERVER_APPLICATION_SUPPORT_DIR="/config/Library/Application Support"
 
