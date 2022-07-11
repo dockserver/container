@@ -75,22 +75,22 @@
    "appname": "docker-dash",
    "apppic": "",
    "appfolder": "./apps/docker-dash",
-   "newversion": "4.3.1",
+   "newversion": "4.3.2",
    "baseimage": "alpine",
    "baseversion": "3.16.0",
    "description": "A simple, modern server dashboard, primarily used by smaller private servers",
-   "body": "Upgrading docker-dash to 4.3.1",
+   "body": "Upgrading docker-dash to 4.3.2",
    "user": "dockserver-image[bot]"
 }
 {
    "appname": "docker-deluge",
    "apppic": "./images/docker-deluge.png",
    "appfolder": "./apps/docker-deluge",
-   "newversion": "2.1.0-0",
+   "newversion": "2.1.1-0",
    "appbranch": "master",
    "baseimage": "ghcr.io/dockserver/docker-ubuntu-focal:latest",
    "description": "Deluge BitTorrent client - Git mirror, PRs only",
-   "body": "Upgrading docker-deluge to 2.1.0-0",
+   "body": "Upgrading docker-deluge to 2.1.1-0",
    "user": "github-actions[bot]"
 }
 {
@@ -163,11 +163,11 @@
    "appname": "docker-jackett",
    "apppic": "./images/docker-jackett.png",
    "appfolder": "./apps/docker-jackett",
-   "newversion": "0.20.1296",
+   "newversion": "0.20.1299",
    "appbranch": "master",
    "baseimage": "ghcr.io/linuxserver/baseimage-ubuntu:bionic",
    "description": "API Support for your favorite torrent trackers",
-   "body": "Upgrading docker-jackett to 0.20.1296",
+   "body": "Upgrading docker-jackett to 0.20.1299",
    "user": "github-actions[bot]"
 }
 {
@@ -609,11 +609,11 @@
    "appname": "docker-radarr-nightly",
    "apppic": "./images/docker-radarr-nightly.png",
    "appfolder": "./nightly/docker-radarr-nightly",
-   "newversion": "4.2.0.6407",
+   "newversion": "4.2.0.6412",
    "appbranch": "nightly",
    "baseimage": "ghcr.io/dockserver/docker-alpine:latest",
    "description": "A fork of Sonarr to work with movies à la Couchpotato.",
-   "body": "Upgrading docker-radarr-nightly to 4.2.0.6407",
+   "body": "Upgrading docker-radarr-nightly to 4.2.0.6412",
    "user": "github-actions[bot]"
 }
 {
