@@ -140,11 +140,11 @@
    "appname": "docker-embystat",
    "apppic": "./images/docker-embystat.png",
    "appfolder": "./apps/docker-embystat",
-   "newversion": "0.2.0-beta.37",
+   "newversion": "0.2.0-beta.38",
    "appbranch": "master",
    "baseimage": "ghcr.io/linuxserver/baseimage-ubuntu:focal",
    "description": "null",
-   "body": "Upgrading docker-embystat to 0.2.0-beta.37",
+   "body": "Upgrading docker-embystat to 0.2.0-beta.38",
    "user": "github-actions[bot]"
 }
 {
@@ -163,11 +163,11 @@
    "appname": "docker-jackett",
    "apppic": "./images/docker-jackett.png",
    "appfolder": "./apps/docker-jackett",
-   "newversion": "0.20.1299",
+   "newversion": "0.20.1319",
    "appbranch": "master",
    "baseimage": "ghcr.io/linuxserver/baseimage-ubuntu:bionic",
    "description": "API Support for your favorite torrent trackers",
-   "body": "Upgrading docker-jackett to 0.20.1299",
+   "body": "Upgrading docker-jackett to 0.20.1319",
    "user": "github-actions[bot]"
 }
 {
@@ -609,21 +609,21 @@
    "appname": "docker-radarr-nightly",
    "apppic": "./images/docker-radarr-nightly.png",
    "appfolder": "./nightly/docker-radarr-nightly",
-   "newversion": "4.2.0.6412",
+   "newversion": "4.2.0.6425",
    "appbranch": "nightly",
    "baseimage": "ghcr.io/dockserver/docker-alpine:latest",
    "description": "A fork of Sonarr to work with movies à la Couchpotato.",
-   "body": "Upgrading docker-radarr-nightly to 4.2.0.6412",
+   "body": "Upgrading docker-radarr-nightly to 4.2.0.6425",
    "user": "github-actions[bot]"
 }
 {
    "appname": "docker-sabnzbd-nightly",
    "apppic": "./images/docker-sabnzbd-nightly.png",
    "appfolder": "./nightly/docker-sabnzbd-nightly",
-   "newversion": "9bac23b38fa44245b23f9ada229186f5fce1507c",
+   "newversion": "3acfe194996aa8e2409644a9135ccb37b76dc0c9",
    "appbranch": "develop",
    "description": "SABnzbd - The automated Usenet download tool",
-   "body": "Upgrading docker-sabnzbd-nightly to 9bac23b38fa44245b23f9ada229186f5fce1507c",
+   "body": "Upgrading docker-sabnzbd-nightly to 3acfe194996aa8e2409644a9135ccb37b76dc0c9",
    "user": "github-actions[bot]"
 }
 {
