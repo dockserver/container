@@ -19,17 +19,24 @@ APP=$2
 USERNAME=$3
 TOKEN=$4
 
+### NIGHTLY HACK
+
+APPNIGHTLY=$(echo $APP | sed "s#-nightly##g" )
+if [[ $FOLDER == "nightly" ]]; then
+   FOLDERNIGHTLY=apps
+fi
+
 ### APP SETTINGS ###
 
-APPBRANCH="master"
+APPBRANCH="beta"
 APPLINK="https://github.com/MediaBrowser/Emby"
-NEWVERSION=$(curl -u $USERNAME:TOKEN -sX GET https://api.github.com/repos/MediaBrowser/Emby.Releases/releases/latest | jq --raw-output '. | .tag_name')
+NEWVERSION=$(curl -u $USERNAME:TOKEN -sX GET https://api.github.com/repos/MediaBrowser/Emby.Releases/releases | jq -r 'first(.[] | select(.prerelease==true )) | .tag_name')
 NEWVERSION="${NEWVERSION#*v}"
 NEWVERSION="${NEWVERSION#*release-}"
 NEWVERSION="${NEWVERSION}"
 
 assets=$(curl -u $USERNAME:TOKEN -sX GET "https://api.github.com/repos/MediaBrowser/Emby.Releases/releases/tags/${NEWVERSION}" | jq -r '.assets[].browser_download_url')
-if echo "$assets"  | grep -q "x86_64.rpm$"; then
+if echo "$assets" | grep -q "x86_64.rpm$"; then
    echo "good we found it "
 else
    echo "**** Not all artifacts are published yet, skipping trigger ****"
@@ -38,7 +45,7 @@ fi
 
 HEADLINE="$(cat ./.templates/headline.txt)"
 
-DESCRIPTION="Docker Container for Emby Server"
+DESCRIPTION="Docker Container for Emby Server with BETA version"
 BASESTAGE="ghcr.io/linuxserver/baseimage-ubuntu:jammy as buildstage"
 INSTCOMMAND="apt-get install -yqq"
 UPTCOMMAND="apt-get update -yqq"
@@ -66,9 +73,13 @@ CLEANUP="apt-get remove -yqq aria2 jq software-properties-common gpg-agent && \\
      rm -rf /tmp/* /var/lib/apt/lists/* /var/tmp/"
 
 PICTURE="./images/$APP.png"
-APPFOLDER="./$FOLDER/$APP"
+APPFOLDER="./$FOLDERNIGHTLY/$APPNIGHTLY"
 PORT="EXPOSE 8096 8920"
 VOLUMEN="VOLUME /config"
+
+[[ ! -d "$APPFOLDER" ]] && \
+  mkdir -p "$APPFOLDER" && \
+  touch "$APPFOLDER/Dockerfile
 
 ### RELEASE SETTINGS ###
 
