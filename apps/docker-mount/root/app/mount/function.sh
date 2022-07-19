@@ -32,12 +32,12 @@ GDSAMIN=4
 ARRAY=$(ls -A ${JSONDIR} | wc -l )
 
 #SCRIPTS
-SROTATE=/app/mount/rotation.sh
 SDISCORD=/app/discord/discord.sh
 
 #FOLDER
 REMOTE=/mnt/unionfs
 JSONDIR=/system/mount/keys
+JSONUSED=/system/mount/.keys/.usedkeys
 SMOUNT=/app/mount
 FDISCORD=/app/discord
 LFOLDER=/app/language/mount
@@ -56,13 +56,10 @@ DLOG=/tmp/discord.dead
 
 
 function log() {
-
    echo "[Mount] ${1}"
-
 }
 
 function checkban() {
-
 if [[ `cat "${MLOG}" | wc -l` -gt 0 ]]; then
    tail -n 20 "${MLOG}" | grep --line-buffered 'downloadQuotaExceeded' | while read ;do
        if [ $? = 0 ]; then
@@ -81,63 +78,50 @@ fi
 }
 
 function rotate() {
-
-if [[ ! -d "/system/mount/.keys" ]]; then
-   $(which mkdir) -p /system/mount/.keys/ && $(which chown) -cR 1000:1000 /system/mount/.keys/ &>/dev/null
-else
+[[ -f "/system/mount/.keys/lastkey" ]] && \
+   $(which rm) -rf /system/mount/.keys/lastkey
+[[ ! -d "/system/mount/.keys" ]] && \
+   $(which mkdir) -p /system/mount/.keys/ && \
    $(which chown) -cR 1000:1000 /system/mount/.keys/ &>/dev/null
-fi
-
-if [[ ! -f /system/mount/.keys/lastkey ]]; then
-   FMINJS=1
-else
-   FMINJS=$(cat /system/mount/.keys/lastkey)
-fi
-
-MINJS=${FMINJS}
-MAXJS=${ARRAY}
-COUNT=$MINJS
-
-if `ls -A ${JSONDIR} | grep "GDSA" &>/dev/null`;then
-   export KEY=GDSA
-elif `ls -A ${JSONDIR} | head -n1 | grep -Po '\[.*?]' | sed 's/.*\[\([^]]*\)].*/\1/' | sed '/GDSA/d'`;then
-   export KEY=""
-else
-   log "no match found of GDSA[01=~100] or [01=~100]"
-   sleep 5
-fi
+[[ -d "/system/mount/.keys" ]] && \
+   $(which chown) -cR 1000:1000 /system/mount/.keys/ &>/dev/null
 if [[ "${ARRAY}" -eq "0" ]]; then
    log " NO KEYS FOUND "
 else
-   log "-->> We switch the ServiceKey to ${GDSA}${COUNT} "
-   IFS=$'\n'
-   filter="$1"
-   mapfile -t mounts < <(eval rclone listremotes --config=${CONFIG} | grep "$filter" | sed -e 's/://g' | sed '/ADDITIONAL/d'  | sed '/downloads/d'  | sed '/crypt/d' | sed '/gdrive/d' | sed '/union/d' | sed '/remote/d' | sed '/GDSA/d')
-   for i in ${mounts[@]}; do
-       $(which rclone) config update $i service_account_file ${GDSA}$MINJS.json --config=${CONFIG}
-       $(which rclone) config update $i service_account_file_path $JSONDIR --config=${CONFIG}
-   done
-
-   log "-->> Rotate to next ServiceKey done || MountKey is now ${GDSA}${COUNT} "
-   if [[ "${ARRAY}" -eq "${COUNT}" ]]; then
-      COUNT=1
-   else
-      COUNT=$(($COUNT >= $MAXJS ? MINJS : $COUNT + 1))
+   JSONUSED=/system/mount/.keys/.usedkeys
+   if [[ ! -f "${JSONUSED}" ]];then
+      ls | sed -e 's/\.json$//' | sort -u > ${JSONUSED}
    fi
-   COUNT=${COUNT}
-   echo "${COUNT}" >/system/mount/.keys/lastkey
-   cp -r /app/rclone/rclone.conf /root/.config/rclone/ && sleep 5 || exit 1
-   log "-->> Next possible ServiceKey is ${GDSA}${COUNT} "
+   $(which cat) "${JSONUSED}" | head -n 1 | while IFS=$'|' read -ra KEY ; do
+      IFS=$'\n'
+      filter="$1"
+      log "-->> We switch the ServiceKey to ${KEY} "
+      mapfile -t mounts < <(eval rclone listremotes --config=${CONFIG} | grep "$filter" | sed -e 's/://g' | sed '/ADDITIONAL/d'  | sed '/downloads/d'  | sed '/crypt/d' | sed '/gdrive/d' | sed '/union/d' | sed '/remote/d' | sed '/GDSA/d')
+      for remote in ${mounts[@]}; do
+          $(which rclone) config update $remote service_account_file ${KEY}.json --config=${CONFIG}
+          $(which rclone) config update $remote service_account_file_path $JSONDIR --config=${CONFIG}
+      done
+      $(which sed) -i 1d "${JSONUSED}" && break
+   done
+   NEXTKEY=$($(which cat) ${JSONUSED} | head -n 1)
+   log "-->> Rotate to next ServiceKey done || MountKey is now ${NEXTKEY} "
+   $(which cp) -r /app/rclone/rclone.conf /root/.config/rclone/ && sleep 5 || exit 1
+   log "-->> Next possible ServiceKey is ${KEY} "
+   if [[ -f "/tmp/rclone.sh" ]]; then
+      $(which screen) -S rclonerc -X quit
+      $(which chmod) 755 /tmp/rclone.sh &>/dev/null
+      $(which screen) -S rclonerc -dm bash -c "$(which bash) /tmp/rclone.sh";
+   else
+      rcloneMOUNT
+   fi
 fi
-
 }
 
 function discord() {
-
    source /system/mount/mount.env
    DATE=$(date "+%Y-%m-%d")
    YEAR=$(date "+%Y")
-
+   SOURCE='https://raw.githubusercontent.com/ChaoticWeg/discord.sh/master/discord.sh'
    if [[ ${ARRAY} -gt 0 ]]; then
        MSG1=${startuphitlimit}
        MSG2=${startuprotate}
@@ -147,14 +131,11 @@ function discord() {
        MSG1=${startuphitlimit}
        MSGSEND="${MSG1}"
    fi
-
-   if [[ ! -d "${FDISCORD}" ]]; then
+   [[ ! -d "${FDISCORD}" ]] && \
       $(which mkdir) -p "${FDISCORD}"
-   fi
-   if [[ ! -f "${SDISCORD}" ]]; then
-      $(which curl) --silent -fsSL https://raw.githubusercontent.com/ChaoticWeg/discord.sh/master/discord.sh -o "${SDISCORD}" && chmod 755 "${SDISCORD}"
-   fi
-   if [[ ! -f "${DLOG}" ]]; then
+   [[ ! -f "${SDISCORD}" ]] && \
+      $(which curl) --silent -fsSL "${SOURCE}" -o "${SDISCORD}" && chmod 755 "${SDISCORD}"
+   [[ ! -f "${DLOG}" ]] && \
       $(which bash) "${SDISCORD}" \
       --webhook-url=${DISCORD_WEBHOOK_URL} \
       --title "${DISCORD_EMBED_TITEL}" \
@@ -168,26 +149,20 @@ function discord() {
       --footer "(c) ${YEAR} DockServer.io" \
       --footer-icon "https://www.freeiconspng.com/uploads/error-icon-4.png" \
       --timestamp > "${DLOG}"
-   fi
-
 }
 
 function envrenew() {
-
    diff -q "$ENVA" "$TMPENV"
    if [ $? -gt 0 ]; then
       rckill && rcset && rcmount && cp -r "$ENVA" "$TMPENV"
     else
       echo "no changes" &>/dev/null
    fi
-
 }
 
 function lang() {
-
    LANGUAGE=${LANGUAGE}
    currenttime=$(date +%H:%M)
-
    if [[ ! -d "/app/language" ]]; then
       $(which git) config --global --add safe.directory /app/language
       $(which git) -C /app clone --quiet https://github.com/dockserver/language.git
@@ -201,23 +176,19 @@ function lang() {
          $(which git) stash clear
       fi
    fi
-
    startupmount=$(grep -Po '"startup.mount": *\K"[^"]*"' "${LFOLDER}/${LANGUAGE}.json" | sed 's/"\|,//g')
    startuphitlimit=$(grep -Po '"startup.hitlimit": *\K"[^"]*"' "${LFOLDER}/${LANGUAGE}.json" | sed 's/"\|,//g')
    startuprotate=$(grep -Po '"startup.rotate": *\K"[^"]*"' "${LFOLDER}/${LANGUAGE}.json" | sed 's/"\|,//g')
    startupnewchanges=$(grep -Po '"startup.newchanges": *\K"[^"]*"' "${LFOLDER}/${LANGUAGE}.json" | sed 's/"\|,//g')
    startuprcloneworks=$(grep -Po '"startup.rcloneworks": *\K"[^"]*"' "${LFOLDER}/${LANGUAGE}.json" | sed 's/"\|,//g')
-
 }
 
 function rlog() {
-
   SIZE=$(du /system/mount/logs/ | cut -f 1)
   ## 200MB max size of file
   if [[ $SIZE -gt 200000 ]]; then
      $(which truncate) -s 0 /system/mount/logs/*.log &>/dev/null
   fi
-
 }
 
 function folderunmount() {
@@ -230,16 +201,17 @@ for fod in /mnt/* ;do
        $(which fusermount) -uzq /mnt/$FOLDER && log "unmounting $FOLDER" || log "failed to unmounting $FOLDER"
     fi
 done
-
 }
 
 function rcmount() {
+  rcloneRC && rcloneMOUNT
+}
 
-if test -f "/tmp/rclone.sh"; then $(which rm) -f /tmp/rclone.sh; fi
-if test -f "/tmp/rclonerc.sh"; then $(which rm) -f /tmp/rclonerc.sh; fi
+function rcloneRC() {
+[[ -f "/tmp/rclonerc.sh" ]] && \
+   $(which rm) -f /tmp/rclonerc.sh
 
 source /system/mount/mount.env
-
 export MLOG=/system/mount/logs/rclone-union.log \
 CONFIG=/app/rclone/rclone.conf
 
@@ -259,8 +231,21 @@ $(which rclone) rcd \\
 --rc-addr :5572 &
 ###
 EOF
+## SET PERMISSIONS
+[[ -f "/tmp/rclonerc.sh" ]] && \
+   $(which chmod) 755 /tmp/rclonerc.sh &>/dev/null
+   $(which chmod) 700 /tmp/screens/S-root &>/dev/null
+   $(which screen) -S rclonercd -dm bash -c "$(which bash) /tmp/rclonerc.sh";
+}
 
-## SPLIT INTO 2 PARTS FASTER RECREATE ###
+function rcloneMOUNT() {
+
+[[ -f "/tmp/rclone.sh" ]] && \
+   $(which rm) -f /tmp/rclone.sh
+source /system/mount/mount.env
+
+export MLOG=/system/mount/logs/rclone-union.log \
+CONFIG=/app/rclone/rclone.conf
 
 cat > /tmp/rclone.sh << EOF; $(echo)
 #!/command/with-contenv bash
@@ -268,7 +253,8 @@ cat > /tmp/rclone.sh << EOF; $(echo)
 # auto generated
 
 ## remove test file
-if test -f "/tmp/rclone.running"; then rm -f /tmp/rclone.running ; fi
+[[ -f "/tmp/rclone.running" ]] && \
+   $(which rm) -f /tmp/rclone.running
 
 #####
 ## start rclone mount
@@ -312,18 +298,10 @@ touch /tmp/rclone.running
 ###
 EOF
 ## SET PERMISSIONS 
-if test -f "/tmp/rclone.sh"; then
+[[ -f "/tmp/rclone.sh" ]] && \
    $(which chmod) 755 /tmp/rclone.sh &>/dev/null
-fi
-if test -f "/tmp/rclonerc.sh"; then
-   $(which chmod) 755 /tmp/rclonerc.sh &>/dev/null
-fi
-## EXECUTION IN BACKGROUND
-$(which chmod) 700 /tmp/screens/S-root &>/dev/null
-## RC PART
-$(which screen) -S rclonercd -dm bash -c "$(which bash) /tmp/rclonerc.sh";
-## MOUHT PART
-$(which screen) -S rclonerc -dm bash -c "$(which bash) /tmp/rclone.sh";
+   $(which chmod) 700 /tmp/screens/S-root &>/dev/null
+   $(which screen) -S rclonerc -dm bash -c "$(which bash) /tmp/rclone.sh";
 
 ## WAIT FOR RUNNING
 for i in rclone; do
