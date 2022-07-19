@@ -21,9 +21,7 @@
 #   want to change anything unless you  #
 #   know what you're doing.             #
 #########################################
-
 source /system/mount/mount.env
-
 #SETTINGS
 CONFIG=/app/rclone/rclone.conf
 ENVA=/system/mount/mount.env
@@ -53,8 +51,6 @@ DLOG=/tmp/discord.dead
 #   want to change anything unless you  #
 #   know what you're doing.             #
 #########################################
-
-
 function log() {
    echo "[Mount] ${1}"
 }
@@ -74,7 +70,6 @@ if [[ `cat "${MLOG}" | wc -l` -gt 0 ]]; then
        fi
    done
 fi
-
 }
 
 function rotate() {
@@ -192,7 +187,6 @@ function rlog() {
 }
 
 function folderunmount() {
-
 for fod in /mnt/* ;do
     basename "$fod" >/dev/null
     FOLDER="$(basename -- $fod)"
@@ -208,8 +202,7 @@ function rcmount() {
 }
 
 function rcloneRC() {
-[[ -f "/tmp/rclonerc.sh" ]] && \
-   $(which rm) -f /tmp/rclonerc.sh
+[[ -f "/tmp/rclonerc.sh" ]] && $(which rm) -f /tmp/rclonerc.sh
 
 source /system/mount/mount.env
 export MLOG=/system/mount/logs/rclone-union.log \
@@ -240,10 +233,8 @@ EOF
 
 function rcloneMOUNT() {
 
-[[ -f "/tmp/rclone.sh" ]] && \
-   $(which rm) -f /tmp/rclone.sh
+[[ -f "/tmp/rclone.sh" ]] && $(which rm) -f /tmp/rclone.sh
 source /system/mount/mount.env
-
 export MLOG=/system/mount/logs/rclone-union.log \
 CONFIG=/app/rclone/rclone.conf
 
@@ -253,8 +244,7 @@ cat > /tmp/rclone.sh << EOF; $(echo)
 # auto generated
 
 ## remove test file
-[[ -f "/tmp/rclone.running" ]] && \
-   $(which rm) -f /tmp/rclone.running
+[[ -f "/tmp/rclone.running" ]] && $(which rm) -f /tmp/rclone.running
 
 #####
 ## start rclone mount
@@ -311,32 +301,26 @@ for i in rclone; do
       break
    fi
 done
-
 }
 
 function rcmergerfs() {
-
 source /system/mount/mount.env
-
 if [[ -d "${ADDITIONAL_MOUNT}" ]];then
    UFSPATH="/mnt/downloads=RW:${ADDITIONAL_MOUNT}=${ADDITIONAL_MOUNT_PERMISSION}:/mnt/remotes=NC"
 else
    UFSPATH="/mnt/downloads=RW:/mnt/remotes=NC"
 fi
-
+###
 MGFS="allow_other,rw,async_read=true,statfs_ignore=nc,use_ino,func.getattr=newest,category.action=all,category.create=mspmfs,cache.writeback=true,cache.symlinks=true,cache.files=auto-full,dropcacheonclose=true,nonempty,minfreespace=0,fsname=mergerfs"
-
 ## TO RUN JUST ONCE
 if ! $(which pgrep) -x "mergerfs" > /dev/null; then
    $(which mergerfs) -o ${MGFS} ${UFSPATH} /mnt/unionfs &>/dev/null
 else
    $(which mergerfs) -o ${MGFS} ${UFSPATH} /mnt/unionfs &>/dev/null
 fi
-
 }
 
 function refreshVFS() {
-
 source /system/mount/mount.env
 log ">> run vfs refresh <<"
 $(which rclone) rc vfs/refresh recursive=true \
@@ -346,11 +330,9 @@ $(which rclone) rc vfs/refresh recursive=true \
 --config=${CONFIG} \
 --log-file=${RLOG} \
 --log-level=${LOGLEVEL_RC} &>/dev/null
-
 }
 
 function rckill() {
-
 source /system/mount/mount.env
 log ">> kill it with fire <<"
 ## GET NAME TO KILL ##
@@ -359,11 +341,9 @@ for killscreen in `screen -ls | grep Detached | cut -d. -f2 | awk '{print $1}'` 
     $(which screen) -S $killscreen -X quit
 done
 folderunmount
-
 }
 
 function rcclean() {
-
 source /system/mount/mount.env
 log ">> run fs cache clear <<"
 $(which rclone) rc fscache/clear \
@@ -377,7 +357,6 @@ $(which rclone) rc fscache/clear \
 }
 
 function rcstats() {
-
 # NOTE LATER
 source /system/mount/mount.env
 log ">> get rclone stats <<"
@@ -389,20 +368,15 @@ $(which rclone) rc core/stats \
 }
 
 function drivecheck() {
-
    if [ "$(ls -1p /mnt/unionfs)" ] && [ "$(ls -1p /mnt/remotes)" ]; then
       rcclean && refreshVFS
    fi
-
 }
 
 function testrun() {
-
 ## force a start sleeping to fetch all options 
-  rlog && \
-  sleep 10
+  rlog && sleep 10
 ## FINAL LOOP
-
 while true; do
    source /system/mount/mount.env
    if [ "$(ls -1p /mnt/remotes)" ] && [ "$(ls -1p /mnt/unionfs)" ]; then
@@ -412,7 +386,6 @@ while true; do
    fi
    rlog && envrenew && lang && checkban && sleep 360
 done
-
 }
 
 #########################################
