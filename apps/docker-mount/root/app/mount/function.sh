@@ -104,10 +104,11 @@ else
    log "-->> Next possible ServiceKey is ${KEY} "
    if [[ -f "/tmp/rclone.sh" ]]; then
       $(which screen) -S rclonerc -X quit
+      $(which fusermount) -uzq /mnt/unionfs
       $(which chmod) 755 /tmp/rclone.sh &>/dev/null
       $(which screen) -S rclonerc -dm bash -c "$(which bash) /tmp/rclone.sh";
    else
-      rcloneMOUNT
+      rcmount
    fi
 fi
 }
@@ -149,7 +150,7 @@ function discord() {
 function envrenew() {
    diff -q "$ENVA" "$TMPENV"
    if [ $? -gt 0 ]; then
-      rckill && rcset && rcmount && cp -r "$ENVA" "$TMPENV"
+      rckill && rcmount && $(which cp) -r "$ENVA" "$TMPENV"
     else
       echo "no changes" &>/dev/null
    fi
@@ -198,41 +199,6 @@ done
 }
 
 function rcmount() {
-  rcloneRC && rcloneMOUNT
-}
-
-function rcloneRC() {
-[[ -f "/tmp/rclonerc.sh" ]] && $(which rm) -f /tmp/rclonerc.sh
-
-source /system/mount/mount.env
-export MLOG=/system/mount/logs/rclone-union.log \
-CONFIG=/app/rclone/rclone.conf
-
-cat > /tmp/rclonerc.sh << EOF; $(echo)
-#!/command/with-contenv bash
-# shellcheck shell=bash
-# auto generated
-
-## minimal rcd with rclone gui
-$(which rclone) rcd \\
---rc-user=${RC_USER} \\
---rc-pass=${RC_PASSWORD} \\
---config=${CONFIG} \\
---rc-web-gui \\
---rc-realm=dockserver \\
---rc-web-gui-no-open-browser \\
---rc-addr :5572 &
-###
-EOF
-## SET PERMISSIONS
-[[ -f "/tmp/rclonerc.sh" ]] && \
-   $(which chmod) 755 /tmp/rclonerc.sh &>/dev/null
-   $(which chmod) 700 /tmp/screens/S-root &>/dev/null
-   $(which screen) -S rclonercd -dm bash -c "$(which bash) /tmp/rclonerc.sh";
-}
-
-function rcloneMOUNT() {
-
 [[ -f "/tmp/rclone.sh" ]] && $(which rm) -f /tmp/rclone.sh
 source /system/mount/mount.env
 export MLOG=/system/mount/logs/rclone-union.log \
@@ -245,6 +211,8 @@ cat > /tmp/rclone.sh << EOF; $(echo)
 
 ## remove test file
 [[ -f "/tmp/rclone.running" ]] && $(which rm) -f /tmp/rclone.running
+
+$(which fusermount) -uzq /mnt/unionfs
 
 #####
 ## start rclone mount
