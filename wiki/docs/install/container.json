@@ -75,11 +75,11 @@
    "appname": "docker-dash",
    "apppic": "",
    "appfolder": "./apps/docker-dash",
-   "newversion": "4.3.5",
+   "newversion": "4.3.6",
    "baseimage": "alpine",
    "baseversion": "3.16.1",
    "description": "A simple, modern server dashboard, primarily used by smaller private servers",
-   "body": "Upgrading docker-dash to 4.3.5",
+   "body": "Upgrading docker-dash to 4.3.6",
    "user": "dockserver-image[bot]"
 }
 {
@@ -154,20 +154,30 @@
    "newversion": "3.16.1",
    "appbranch": "master",
    "baseimage": "alpine",
-   "appversion": "d138e13bd4bece3e9274fafe30b466a2dbefad14",
+   "appversion": "0f9cfde7125548eb9922f471977f0c92204dd557",
    "description": "A personal home page for quick access to all your personal apps/sites.",
-   "body": "Upgrading docker-fenrus to d138e13bd4bece3e9274fafe30b466a2dbefad14",
+   "body": "Upgrading docker-fenrus to 0f9cfde7125548eb9922f471977f0c92204dd557",
    "user": "github-actions[bot]"
+}
+{
+   "appname": "docker-gdsa",
+   "apppic": "./images/docker-gdsa.png",
+   "appfolder": "./apps/docker-gdsa",
+   "newversion": "394.0.0-alpine",
+   "baseimage": "gcr.io/google.com/cloudsdktool/cloud-sdk",
+   "description": "Docker for Creating GDSA keys",
+   "body": "Upgrading docker-gdsa to 394.0.0-alpine",
+   "user": "dockserver-actions[bot]"
 }
 {
    "appname": "docker-jackett",
    "apppic": "./images/docker-jackett.png",
    "appfolder": "./apps/docker-jackett",
-   "newversion": "0.20.1326",
+   "newversion": "0.20.1406",
    "appbranch": "master",
    "baseimage": "ghcr.io/linuxserver/baseimage-ubuntu:bionic",
    "description": "API Support for your favorite torrent trackers",
-   "body": "Upgrading docker-jackett to 0.20.1326",
+   "body": "Upgrading docker-jackett to 0.20.1406",
    "user": "github-actions[bot]"
 }
 {
@@ -298,22 +308,22 @@
    "appname": "docker-plex",
    "apppic": "./images/docker-plex.png",
    "appfolder": "./apps/docker-plex",
-   "newversion": "1.28.0.5973-52ca4217f",
+   "newversion": "1.28.0.5998-adb79ff3b",
    "appbranch": "master",
    "baseimage": "ghcr.io/linuxserver/baseimage-ubuntu:jammy",
    "description": "Docker Container for Plex Media Server || PLEX PASS",
-   "body": "Upgrading docker-plex to 1.28.0.5973-52ca4217f",
+   "body": "Upgrading docker-plex to 1.28.0.5998-adb79ff3b",
    "user": "github-actions[bot]"
 }
 {
    "appname": "docker-prowlarr",
    "apppic": "./images/docker-prowlarr.png",
    "appfolder": "./apps/docker-prowlarr",
-   "newversion": "0.4.3.1905",
+   "newversion": "0.4.3.1908",
    "appbranch": "nightly",
    "baseimage": "ghcr.io/dockserver/docker-alpine:latest",
    "description": "null",
-   "body": "Upgrading docker-prowlarr to 0.4.3.1905",
+   "body": "Upgrading docker-prowlarr to 0.4.3.1908",
    "user": "github-actions[bot]"
 }
 {
@@ -450,7 +460,7 @@
    "appbranch": "master",
    "newversion": "3.16.1",
    "appversion": "1.4.27",
-   "wikiversion": "8.3.9",
+   "wikiversion": "8.4.0rc1",
    "baseimage": "alpine",
    "description": "Docker + Traefik with Authelia and Cloudflare Protection",
    "body": "Upgrading docker-wiki to 3.16.1",
@@ -598,32 +608,32 @@
    "appname": "docker-overseerr-nightly",
    "apppic": "./images/docker-overseerr-nightly.png",
    "appfolder": "./nightly/docker-overseerr-nightly",
-   "newversion": "a6c1f3f7ce498e32817cc8c74d439e8d99d6fbf4",
+   "newversion": "6cd0c9b2c81db2728ce09a9bc273a9aee366acbc",
    "appbranch": "develop",
    "baseimage": "ghcr.io/dockserver/docker-alpine:latest",
    "description": "Request management and media discovery tool for the Plex ecosystem",
-   "body": "Upgrading docker-overseerr-nightly to a6c1f3f7ce498e32817cc8c74d439e8d99d6fbf4",
+   "body": "Upgrading docker-overseerr-nightly to 6cd0c9b2c81db2728ce09a9bc273a9aee366acbc",
    "user": "github-actions[bot]"
 }
 {
    "appname": "docker-radarr-nightly",
    "apppic": "./images/docker-radarr-nightly.png",
    "appfolder": "./nightly/docker-radarr-nightly",
-   "newversion": "4.2.0.6438",
+   "newversion": "4.2.1.6448",
    "appbranch": "nightly",
    "baseimage": "ghcr.io/dockserver/docker-alpine:latest",
    "description": "A fork of Sonarr to work with movies à la Couchpotato.",
-   "body": "Upgrading docker-radarr-nightly to 4.2.0.6438",
+   "body": "Upgrading docker-radarr-nightly to 4.2.1.6448",
    "user": "github-actions[bot]"
 }
 {
    "appname": "docker-sabnzbd-nightly",
    "apppic": "./images/docker-sabnzbd-nightly.png",
    "appfolder": "./nightly/docker-sabnzbd-nightly",
-   "newversion": "3acfe194996aa8e2409644a9135ccb37b76dc0c9",
+   "newversion": "5e8e37e6a250f2cf41700eca0f6b990cdfc96246",
    "appbranch": "develop",
    "description": "SABnzbd - The automated Usenet download tool",
-   "body": "Upgrading docker-sabnzbd-nightly to 3acfe194996aa8e2409644a9135ccb37b76dc0c9",
+   "body": "Upgrading docker-sabnzbd-nightly to 5e8e37e6a250f2cf41700eca0f6b990cdfc96246",
    "user": "github-actions[bot]"
 }
 {

@@ -16,46 +16,24 @@
 #####################################
 # shellcheck disable=SC2086
 # shellcheck disable=SC2046
-FROM alpine:3.16.1 as buildstage
+FROM gcr.io/google.com/cloudsdktool/cloud-sdk:alpine
 LABEL org.opencontainers.image.source="https://github.com/dockserver/container"
 
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
-
-ARG BASEVERSION="3.16.1"
-ARG APPVERSION="1.4.27"
-ARG WIKIVERSION="8.4.0rc1"
-ARG BRANCH="master"
-
-## BUILDSTAGE
+ARG VERSION="394.0.0-alpine"
 
 RUN \
   echo "**** update packages ****" && \
     apk --quiet --no-cache --no-progress update && \
-    apk --quiet --no-cache --no-progress upgrade && \
+  apk --quiet --no-cache --no-progress upgrade && \
   echo "**** install build packages ****" && \
-    apk add -U --update --no-cache bash git && \
-  echo "**** install wiki ****" && \
-    mkdir -p /app && git clone --quiet https://github.com/dockserver/dockserver.git /app && \
+    apk add -U --update --no-cache bash curl shadow musl findutils coreutils ca-certificates musl && \
   echo "*** cleanup system ****" && \
     apk del --quiet --clean-protected --no-progress && \
-    rm -f /var/cache/apk/*
+  rm -f /var/cache/apk/*
 
-## FINALSTAGE
+COPY ./apps/docker-gdsa/root/ /
 
-FROM ghcr.io/squidfunk/mkdocs-material:8.4.0rc1
-
-COPY --from=buildstage /app/wiki /docs
-
-RUN \
-  echo "**** run wiki packages ****" && \
-  python3 -m pip install --upgrade pip && \
-  python3 -m pip install --no-warn-script-location --upgrade --force-reinstall -r /docs/requirements.txt && \
-  rm -rf /tmp/* && rm -rf /var/cache/apk/* && rm -rf /root/.cache
-
-WORKDIR /docs
-
-EXPOSE 8000
-ENTRYPOINT ["mkdocs"]
-CMD [ "serve" , "--dev-addr=0.0.0.0:8000" ]
+ENTRYPOINT ["/bin/bash", "/gdsastart.sh"]
 ##EOF
