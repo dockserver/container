@@ -9,5 +9,3 @@ if [ -n "${NVIDIA_VISIBLE_DEVICES}" ]; then
    /usr/local/bin/docker-entrypoint.sh
    echo "Patched nvidia"
 fi
-
-
