@@ -259,8 +259,7 @@ EOF
 ## SET PERMISSIONS 
 [[ -f "/tmp/rclone.sh" ]] && \
    $(which chmod) 755 /tmp/rclone.sh &>/dev/null
-   $(which chmod) 700 /tmp/screens/S-root &>/dev/null
-   $(which screen) -S rclonerc -dm bash -c "$(which bash) /tmp/rclone.sh";
+   $(which bash) /tmp/rclone.sh
 
 while true; do
   if [ "$(ls -1p /mnt/remotes)" ]; then
@@ -283,8 +282,6 @@ MGFS="allow_other,rw,async_read=true,statfs_ignore=nc,use_ino,func.getattr=newes
 ## TO RUN JUST ONCE
 if ! $(which pgrep) -x "mergerfs" > /dev/null; then
    $(which mergerfs) -o ${MGFS} ${UFSPATH} /mnt/unionfs &>/dev/null
-else
-   $(which mergerfs) -o ${MGFS} ${UFSPATH} /mnt/unionfs &>/dev/null
 fi
 }
 
@@ -304,9 +301,8 @@ function rckill() {
 source /system/mount/mount.env
 log ">> kill it with fire <<"
 ## GET NAME TO KILL ##
-for killscreen in `screen -ls | grep Detached | cut -d. -f2 | awk '{print $1}'` ; do
-    log "we kill now $killscreen" && \
-    $(which screen) -S $killscreen -X quit
+for killscreen in `pgrep -x rclone`; do
+    log "we kill now $killscreen" && kill -9 $killscreen
 done
 folderunmount
 }
