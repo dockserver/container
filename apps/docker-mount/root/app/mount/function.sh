@@ -250,24 +250,24 @@ $(which rclone) mount remote: /mnt/remotes \\
 --vfs-cache-max-size=${VFS_CACHE_MAX_SIZE} \\
 --vfs-read-chunk-size-limit=${VFS_READ_CHUNK_SIZE_LIMIT} \\
 --vfs-read-chunk-size=${VFS_READ_CHUNK_SIZE} \\
---rc --rc-user=${RC_USER} --rc-pass=${RC_PASSWORD}
+--rc --rc-user=${RC_USER} --rc-pass=${RC_PASSWORD} &
 
 touch /tmp/rclone.running
 ###
 EOF
+
 ## SET PERMISSIONS 
 [[ -f "/tmp/rclone.sh" ]] && \
    $(which chmod) 755 /tmp/rclone.sh &>/dev/null
    $(which chmod) 700 /tmp/screens/S-root &>/dev/null
    $(which screen) -S rclonerc -dm bash -c "$(which bash) /tmp/rclone.sh";
 
-## WAIT FOR RUNNING
-for i in rclone; do
-   if ! $(which pgrep) -x "$i" > /dev/null ; then
-      sleep 5
-   else
-      break
-   fi
+while true; do
+  if [ "$(ls -1p /mnt/remotes)" ]; then
+     break
+  else 
+     sleep 5
+  fi
 done
 }
 
