@@ -198,6 +198,39 @@ for fod in /mnt/* ;do
 done
 }
 
+function rcwebui() {
+
+export ECLOG=/system/mount/logs/rclone-webui.log
+
+[[ -f "${ECLOG}" ]] && $(which rm) -rf "${ECLOG}"
+[[ ! -f "${ECLOG}" ]] && $(which touch) "${ECLOG}"
+
+cat > /tmp/rclonewebui.sh << EOF; $(echo)
+#!/command/with-contenv bash
+# shellcheck shell=bash
+# auto generated
+## BIND PORT 8080 FOR THE UI
+exec 2>&1
+exec $(which rclone) rcd \\
+  --transfers 4 \\
+  --rc-no-auth \\
+  --rc-addr :8080 \\
+  --rc-allow-origin=* \\
+  --rc-web-gui \\
+  --rc-web-gui-force-update \\
+  --rc-web-gui-no-open-browser \\
+  --log-file=${ECLOG} \\
+  --rc-web-fetch-url=https://api.github.com/repos/controlol/rclone-webui/releases/latest
+EOF
+
+## SET PERMISSIONS
+[[ -f ${ECLOG} ]] && \
+   $(which chmod) 755 ${ECLOG}
+[[ -f "/tmp/rclonewebui.sh " ]] && \
+   $(which chmod) 755 /tmp/rclonewebui.sh &>/dev/null && \
+   $(which bash) /tmp/rclonewebui.sh &
+}
+
 function rcmount() {
 [[ -f "/tmp/rclone.sh" ]] && $(which rm) -f /tmp/rclone.sh
 source /system/mount/mount.env
@@ -212,18 +245,17 @@ cat > /tmp/rclone.sh << EOF; $(echo)
 ## remove test file
 [[ -f "/tmp/rclone.running" ]] && $(which rm) -f /tmp/rclone.running
 
-if [[ `ls -lHR /mnt/rclone_cache/ | wc -l` -gt 0 ]] ; then
+if [[ "$(ls -1p /mnt/remotes)" ]] ; then
    log " cleanup from rclone cache | please wait"
-   $(which rm) -rf /mnt/rclone_cache/
+   $(which rm) -rf /mnt/rclone_cache/*
    if [ $? -gt 0 ]; then
       log " cleanup finished "
    fi
 fi
 
 $(which fusermount) -uzq /mnt/unionfs
+$(which fusermount) -uzq /mnt/remotes
 
-#####
-## start rclone mount
 $(which rclone) mount remote: /mnt/remotes \\
 --config=${CONFIG} \\
 --log-file=${MLOG} \\
@@ -231,41 +263,39 @@ $(which rclone) mount remote: /mnt/remotes \\
 --uid=${PUID} \\
 --gid=${PGID} \\
 --umask=${UMASK} \\
---no-checksum \\
 --allow-other \\
 --allow-non-empty \\
---timeout=1h \\
+--timeout=10m \\
+--async-read=true \\
 --use-mmap \\
---no-modtime \\
---no-seek \\
---ignore-errors \\
 --poll-interval=${POLL_INTERVAL} \\
 --user-agent=${UAGENT} \\
 --cache-dir=${TMPRCLONE} \\
---tpslimit=${TPSLIMIT} \\
---tpslimit-burst=${TPSBURST} \\
+--drive-pacer-min-sleep=10ms \\
+--drive-pacer-burst=1000 \\
 --drive-use-trash=${DRIVETRASH} \\
 --drive-stop-on-upload-limit \\
 --drive-server-side-across-configs \\
---drive-acknowledge-abuse \\
 --drive-chunk-size=${DRIVE_CHUNK_SIZE} \\
 --buffer-size=${BUFFER_SIZE} \\
 --dir-cache-time=${DIR_CACHE_TIME} \\
 --cache-info-age=${CACHE_INFO_AGE} \\
+--vfs-fast-fingerprint \\
 --vfs-cache-poll-interval=${VFS_CACHE_POLL_INTERVAL} \\
 --vfs-cache-mode=${VFS_CACHE_MODE} \\
 --vfs-cache-max-age=${VFS_CACHE_MAX_AGE} \\
 --vfs-cache-max-size=${VFS_CACHE_MAX_SIZE} \\
---vfs-read-chunk-size-limit=${VFS_READ_CHUNK_SIZE_LIMIT} \\
 --vfs-read-chunk-size=${VFS_READ_CHUNK_SIZE} \\
+--vfs-read-chunk-size-limit=${VFS_READ_CHUNK_SIZE_LIMIT} \\
 --rc --rc-addr :5572 --rc-no-auth --daemon
+
 touch /tmp/rclone.running
-###
+echo $(date) > /tmp/rclone.running###
 EOF
 
 ## SET PERMISSIONS 
 [[ -f "/tmp/rclone.sh" ]] && \
-   $(which chmod) 755 /tmp/rclone.sh &>/dev/null
+   $(which chmod) 755 /tmp/rclone.sh && \
    $(which bash) /tmp/rclone.sh
 
 while true; do
@@ -299,9 +329,10 @@ for fod in /mnt/remotes/* ;do
     basename "$fod" >/dev/null
     FOLDER="$(basename -- $fod)"
     IFS=- read -r <<< "$ACT"
-    $(which rclone) rc vfs/forget dir=$FOLDER --fast-list --rc-addr 127.0.0.1:5572 _async=true
-    sleep 1
-    $(which rclone) rc vfs/refresh dir=$FOLDER --fast-list --rc-addr 127.0.0.1:5572 _async=true
+      echo $FOLDER
+      $(which rclone) rc vfs/forget dir=$FOLDER --fast-list --rc-addr 127.0.0.1:5572 _async=true
+      $(which sleep) 1
+      $(which rclone) rc vfs/refresh dir=$FOLDER --fast-list --rc-addr 127.0.0.1:5572 _async=true
 done  
 }
 
@@ -337,7 +368,7 @@ function drivecheck() {
 
 function testrun() {
 ## force a start sleeping to fetch all options 
-  rlog && sleep 10
+  rlog && sleep 5
 ## FINAL LOOP
 while true; do
    source /system/mount/mount.env
