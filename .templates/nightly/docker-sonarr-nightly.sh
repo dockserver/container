@@ -40,7 +40,6 @@ DESCRIPTION="$(curl -u $USERNAME:$TOKEN -sX GET "$APPLINK" | jq -r '.description
 PICTURE="./images/$APP.png"
 APPFOLDER="./$FOLDERNIGHTLY/$APPNIGHTLY"
 
-
 ### RELEASE SETTINGS ###
 
 echo '{
