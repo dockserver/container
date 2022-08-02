@@ -212,6 +212,14 @@ cat > /tmp/rclone.sh << EOF; $(echo)
 ## remove test file
 [[ -f "/tmp/rclone.running" ]] && $(which rm) -f /tmp/rclone.running
 
+if [[ `ls -lHR /mnt/rclone_cache/ | wc -l` -gt 0 ]] ; then
+   log " cleanup from rclone cache | please wait"
+   $(which rm) -rf /mnt/rclone_cache/
+   if [ $? -gt 0 ]; then
+      log " cleanup finished "
+   fi
+fi
+
 $(which fusermount) -uzq /mnt/unionfs
 
 #####
@@ -228,14 +236,14 @@ $(which rclone) mount remote: /mnt/remotes \\
 --allow-non-empty \\
 --timeout=1h \\
 --use-mmap \\
+--no-modtime \\
+--no-seek \\
 --ignore-errors \\
 --poll-interval=${POLL_INTERVAL} \\
 --user-agent=${UAGENT} \\
 --cache-dir=${TMPRCLONE} \\
 --tpslimit=${TPSLIMIT} \\
 --tpslimit-burst=${TPSBURST} \\
---no-modtime \\
---no-seek \\
 --drive-use-trash=${DRIVETRASH} \\
 --drive-stop-on-upload-limit \\
 --drive-server-side-across-configs \\
@@ -250,8 +258,7 @@ $(which rclone) mount remote: /mnt/remotes \\
 --vfs-cache-max-size=${VFS_CACHE_MAX_SIZE} \\
 --vfs-read-chunk-size-limit=${VFS_READ_CHUNK_SIZE_LIMIT} \\
 --vfs-read-chunk-size=${VFS_READ_CHUNK_SIZE} \\
---rc --rc-user=${RC_USER} --rc-pass=${RC_PASSWORD} &
-
+--rc --rc-addr :5572 --rc-no-auth --daemon
 touch /tmp/rclone.running
 ###
 EOF
@@ -288,13 +295,14 @@ fi
 function refreshVFS() {
 source /system/mount/mount.env
 log ">> run vfs refresh <<"
-$(which rclone) rc vfs/refresh recursive=true \
---fast-list \
---rc-user=${RC_USER} \
---rc-pass=${RC_PASSWORD} \
---config=${CONFIG} \
---log-file=${RLOG} \
---log-level=${LOGLEVEL_RC} &>/dev/null
+for fod in /mnt/remotes/* ;do
+    basename "$fod" >/dev/null
+    FOLDER="$(basename -- $fod)"
+    IFS=- read -r <<< "$ACT"
+    $(which rclone) rc vfs/forget dir=$FOLDER --fast-list --rc-addr 127.0.0.1:5572 _async=true
+    sleep 1
+    $(which rclone) rc vfs/refresh dir=$FOLDER --fast-list --rc-addr 127.0.0.1:5572 _async=true
+done  
 }
 
 function rckill() {
@@ -310,24 +318,14 @@ folderunmount
 function rcclean() {
 source /system/mount/mount.env
 log ">> run fs cache clear <<"
-$(which rclone) rc fscache/clear \
---fast-list \
---rc-user=${RC_USER} \
---rc-pass=${RC_PASSWORD} \
---config=${CONFIG} \
---log-file=${CLOG} \
---log-level=${LOGLEVEL_RC}
-
+$(which rclone) rc fscache/clear --fast-list --rc-addr 127.0.0.1:5572 _async=true
 }
 
 function rcstats() {
 # NOTE LATER
 source /system/mount/mount.env
 log ">> get rclone stats <<"
-$(which rclone) rc core/stats \
---rc-user=${RC_USER} \
---rc-pass=${RC_PASSWORD} \
---config=${CONFIG}
+$(which rclone) rc core/stats --config=${CONFIG}
 
 }
 
