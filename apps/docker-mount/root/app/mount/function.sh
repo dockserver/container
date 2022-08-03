@@ -214,7 +214,7 @@ exec 2>&1
 exec $(which rclone) rcd \\
   --transfers 4 \\
   --rc-no-auth \\
-  --rc-addr :8080 \\
+  --rc-addr=0.0.0.0:8544 \\
   --rc-allow-origin=* \\
   --rc-web-gui \\
   --rc-web-gui-force-update \\
@@ -329,10 +329,10 @@ for fod in /mnt/remotes/* ;do
     basename "$fod" >/dev/null
     FOLDER="$(basename -- $fod)"
     IFS=- read -r <<< "$ACT"
-      echo $FOLDER
-      $(which rclone) rc vfs/forget dir=$FOLDER --fast-list --rc-addr 127.0.0.1:5572 _async=true
+      log " VFS refreshing : $FOLDER"
+      $(which rclone) rc vfs/forget dir=$FOLDER --fast-list --rc-addr=0.0.0.0:5573 _async=true
       $(which sleep) 1
-      $(which rclone) rc vfs/refresh dir=$FOLDER --fast-list --rc-addr 127.0.0.1:5572 _async=true
+      $(which rclone) rc vfs/refresh dir=$FOLDER --fast-list --rc-addr=0.0.0.0:5573 _async=true
 done  
 }
 
@@ -349,7 +349,7 @@ folderunmount
 function rcclean() {
 source /system/mount/mount.env
 log ">> run fs cache clear <<"
-$(which rclone) rc fscache/clear --fast-list --rc-addr 127.0.0.1:5572 _async=true
+$(which rclone) rc fscache/clear --fast-list --rc-addr=0.0.0.0:5573 _async=true
 }
 
 function rcstats() {
