@@ -209,12 +209,6 @@ function rcloneupload() {
       $(which chmod) 0755 -R "${DLFOLDER}/${UPP[1]}" &>/dev/null
    fi
    #### CHECK IS CUSTOM RCLONE.CONF IS AVAILABLE ####
-   ##if test -f "${CUSTOM}/${FILE}.conf" ; then
-   ##   CONFIG=${CUSTOM}/${FILE}.conf
-   ##else
-   ##   CONFIG=/system/servicekeys/rclonegdsa.conf && \
-   ##fi
-   #### CHECK IS CUSTOM RCLONE.CONF IS AVAILABLE ####
    if test -f "${CUSTOM}/${FILE}.conf" ; then
       CONFIG=${CUSTOM}/${FILE}.conf && \
         USED=`$(which rclone) listremotes --config=${CONFIG} | grep "$1" | sed -e 's/://g' | sed -e 's/GDSA//g' | sort`
@@ -261,6 +255,7 @@ function rcloneupload() {
    $(which tail) -n 100 "${LOGFILE}/${FILE}.txt" | grep --line-buffered 'Error' | while read ;do
       if [ $? = 0 ]; then
          FILE="GOOGLE : ERROR LIMIT IS REACHED"
+         $(which echo) "{\"filedir\": \"${DIR}\",\"filebase\": \"${FILE}\",\"filesize\": \"${SIZE}\",\"gdsa\": \"FAILED\",\"starttime\": \"${STARTZ}\",\"endtime\": \"${ENDZ}\"}" > "${DONE}/${FILE}.json"
          TDID=$(cat ${CONFIG} | egrep team_drive | awk $'{print $3}' | head -n 1)
          $(which error) "${TDID}" > /tmp/drop
       else
