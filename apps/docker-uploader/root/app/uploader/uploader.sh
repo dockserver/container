@@ -258,9 +258,17 @@ function rcloneupload() {
       --tpslimit 20
    #### END TIME UPLOAD ####
    ENDZ=$(date +%s)
+   $(which tail) -n 100 "${LOGFILE}/${FILE}.txt" | grep --line-buffered 'Error' | while read ;do
+      if [ $? = 0 ]; then
+         FILE="GOOGLE : ERROR LIMIT IS REACHED"
+         TDID=$(cat ${CONFIG} | egrep team_drive | awk $'{print $3}' | head -n 1)
+         $(which error) "${TDID}" > /tmp/drop
+      else
+         $(which echo) "{\"filedir\": \"${DIR}\",\"filebase\": \"${FILE}\",\"filesize\": \"${SIZE}\",\"gdsa\": \"${KEY}$[USED]${CRYPTED}\",\"starttime\": \"${STARTZ}\",\"endtime\": \"${ENDZ}\"}" > "${DONE}/${FILE}.json"
+      fi
+   done
    #### ECHO END-PARTS FOR UI READING ####
    $(which find) "${DLFOLDER}/${SETDIR}" -type d -empty -delete &>/dev/null
-   $(which echo) "{\"filedir\": \"${DIR}\",\"filebase\": \"${FILE}\",\"filesize\": \"${SIZE}\",\"gdsa\": \"${KEY}$[USED]${CRYPTED}\",\"starttime\": \"${STARTZ}\",\"endtime\": \"${ENDZ}\"}" > "${DONE}/${FILE}.json"
    #### UNSET CRYPTED WHEN USED CRYPTED KEYS ####
    unset CRYPTED
    #### END OF MOVE ####
@@ -276,7 +284,7 @@ function rcloneupload() {
       $(which chmod) 755 -R "${DONE}/${FILE}.json" &>/dev/null
    fi
    #### REMOVE CUSTOM RCLONE.CONF ####
-   if test -f "${CUSTOM}/${FILE}.conf";then
+   if test -f "${CUSTOM}/${FILE}.conf"; then
       $(which rm) -rf ${CUSTOM}/${FILE}.conf
    fi
 }
@@ -285,7 +293,19 @@ function listfiles() {
    source /system/uploader/uploader.env
    DLFOLDER=${DLFOLDER}
    #### RCLONE LIST FILE ####
-   $(which rclone) lsf "${DLFOLDER}" --files-only -R -s "|" -F "tp" --exclude-from="${EXCLUDE}" | sort -n > "${CHK}" 2>&1
+   TDID=$(cat ${CONFIG} | egrep team_drive | awk $'{print $3}' | head -n 1)
+   if [[ -f "/tmp/drop" ]]; then
+      TCHECK=$(cat /tmp/drop)
+      diff -q "$TDID" "$TCHECK"
+      if [ $? -gt 0 ]; then
+         log " !!! THE LIMIT ON THE DRIVE IS REACHED !!!"
+      else
+         $(which rm) -rf /tmp/drop
+      fi
+   else
+      $(which rclone) lsf "${DLFOLDER}" --files-only -R -s "|" -F "tp" --exclude-from="${EXCLUDE}" | sort -n > "${CHK}" 2>&1
+   fo
+
 }
 
 function checkspace() {
