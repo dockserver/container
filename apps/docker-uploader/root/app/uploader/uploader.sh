@@ -261,8 +261,11 @@ function rcloneupload() {
       else
          $(which echo) "{\"filedir\": \"${DIR}\",\"filebase\": \"${FILE}\",\"filesize\": \"${SIZE}\",\"gdsa\": \"${KEY}$[USED]${CRYPTED}\",\"starttime\": \"${STARTZ}\",\"endtime\": \"${ENDZ}\"}" > "${DONE}/${FILE}.json"
          ### SEND REFRESH AND FORGET TO MOUNT DOCKER ###
-         $(which curl) -fs -X POST "rclone:rclone@mount:8554/vfs/forget?dir=${DIR}&_async=true"
-         $(which curl) -fs -X POST "rclone:rclone@mount:8554/vfs/refresh?dir=${DIR}&recursive=true&_async=true"
+         STATUSCODE=$($(which curl) --silent --output /dev/null --write-out "%{http_code}" "rclone:rclone@mount:8554")
+         if test $STATUSCODE == 200; then
+            $(which curl) -fs -X POST "rclone:rclone@mount:8554/vfs/forget?dir=${DIR}&_async=true"
+            $(which curl) -fs -X POST "rclone:rclone@mount:8554/vfs/refresh?dir=${DIR}&recursive=true&_async=true"
+         fi
       fi
    done
    #### ECHO END-PARTS FOR UI READING ####
