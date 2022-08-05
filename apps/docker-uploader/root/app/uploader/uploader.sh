@@ -288,19 +288,18 @@ function listfiles() {
    source /system/uploader/uploader.env
    DLFOLDER=${DLFOLDER}
    #### RCLONE LIST FILE ####
-   TDID=$(cat ${CONFIG} | egrep team_drive | awk $'{print $3}' | head -n 1)
    if [[ -f "/tmp/drop" ]]; then
+      TDID=$(cat ${CONFIG} | egrep team_drive | awk $'{print $3}' | head -n 1)
       TCHECK=$(cat /tmp/drop)
-      diff -q "$TDID" "$TCHECK"
-      if [ $? -gt 0 ]; then
-         log " !!! THE LIMIT ON THE DRIVE IS REACHED !!!"
+      #### CHECK IS TEAMDRIVE ID DIFFENT AS FILLED DRIVE ####
+      if [[ $TDID == $TCHECK ]]; then
+         log "!!! THE LIMIT ON THE DRIVE IS REACHED !!!"
       else
          $(which rm) -rf /tmp/drop
       fi
    else
       $(which rclone) lsf "${DLFOLDER}" --files-only -R -s "|" -F "tp" --exclude-from="${EXCLUDE}" | sort -n > "${CHK}" 2>&1
-   fo
-
+   fi
 }
 
 function checkspace() {
