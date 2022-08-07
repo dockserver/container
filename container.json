@@ -206,11 +206,11 @@ apps docker-jackett
    "appname": "docker-jackett",
    "apppic": "./images/docker-jackett.png",
    "appfolder": "./apps/docker-jackett",
-   "newversion": "0.20.1606",
+   "newversion": "0.20.1627",
    "appbranch": "master",
    "baseimage": "ghcr.io/linuxserver/baseimage-ubuntu:bionic",
    "description": "API Support for your favorite torrent trackers",
-   "body": "Upgrading docker-jackett to 0.20.1606",
+   "body": "Upgrading docker-jackett to 0.20.1627",
    "user": "github-actions[bot]"
 }
 
@@ -480,7 +480,7 @@ apps docker-spotweb
    "apppic": "",
    "appfolder": "./apps/docker-spotweb",
    "newversion": "1.5.1",
-   "baseimage": "ubuntu:21.10",
+   "baseimage": "ubuntu:latest",
    "description": "Decentralized community",
    "body": "Upgrading docker-spotweb to 1.5.1",
    "user": "dockserver[bot]"
