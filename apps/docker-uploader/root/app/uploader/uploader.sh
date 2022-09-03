@@ -344,12 +344,12 @@ function transfercheck() {
             #### CHANGE MODTIME OF FILE ####
             $(which touch) -m "${DLFOLDER}/${UPP[1]}"
          fi
-         #### RELOAD CHECK FILE ####
-         listfiles
          $(which sleep) 5 && break
       else
          $(which sleep) 10
       fi
+      #### RELOAD CHECK FILE ####
+      listfiles
    done
 }
 
