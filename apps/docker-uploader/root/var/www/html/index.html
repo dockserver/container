@@ -28,11 +28,22 @@
     </header>
 
     <main>
+      <button
+        class="accordion-button text-left font-semibold"
+        type="button"
+        aria-expanded="false"
+      >
+        <span>In Progress</span>
+        <i class="fa fa-plus collapse-close absolute right-0 pt-1 text-xs"></i>
+        <i class="fa fa-minus collapse-open absolute right-0 pt-1 text-xs"></i>
+      </button>
         <div class="row">
             <div class="pricing-header p-3 pb-md-4 mx-auto text-start">
                 <p class="h5 fw-normal">In Progress</p>
             </div>
-            <div class="col col-12">
+           <div class="collapse open">
+            <div class="py-4 text-sm opacity-60">
+              <div class="col col-12">
                 <div class="table-responsive" id="no-more-tables">
                     <table id="uploadsTable" class="table table-sm">
                         <thead class="table-primary">
@@ -52,6 +63,8 @@
                         </tbody>
                     </table>
                 </div>
+              </div>
+             </div>
             </div>
         </div>
         <div class="row">
