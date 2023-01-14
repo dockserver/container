@@ -28,10 +28,14 @@
     </header>
 
     <main>
-        <div class="row">
-            <div class="pricing-header p-3 pb-md-4 mx-auto text-start">
-                <p class="h5 fw-normal">In Progress</p>
+        <button data-toggle="collapse" class="pricing-header p-3 pb-md-4 mx-auto text-start" data-target="#inprogress">In Progress</button>
+        <button data-toggle="collapse" class="pricing-header p-3 pb-md-4 mx-auto text-start" data-target="#complete">Complete</button>
+
+         <div class="row">
+            <div class="p-3 pb-md-4 mx-auto text-start d-inline-flex justify-content-between">
+                <span class="h5 fw-normal">InProgress</span>
             </div>
+            <div id="inprogress" class="collapse">
             <div class="col col-12">
                 <div class="table-responsive" id="no-more-tables">
                     <table id="uploadsTable" class="table table-sm">
@@ -53,7 +57,9 @@
                     </table>
                 </div>
             </div>
+           </div>
         </div>
+        <div id="complete" class="collapse">
         <div class="row">
             <div class="p-3 pb-md-4 mx-auto text-start d-inline-flex justify-content-between">
                 <span class="h5 fw-normal">Completed</span>
@@ -97,6 +103,7 @@
                     </table>
                 </div>
             </div>
+          </div>
         </div>
         <div class="inb">
           <center>
