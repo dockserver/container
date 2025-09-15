@@ -27,10 +27,10 @@ apps docker-crunchy
    "appname": "docker-crunchy",
    "apppic": "./images/docker-crunchy.png",
    "appfolder": "./apps/docker-crunchy",
-   "newversion": "25.10",
+   "newversion": "25.04",
    "baseimage": "ubuntu",
    "description": "Docker image  for docker-crunchy",
-   "body": "Upgrading docker-crunchy to baseimage: ubuntu:25.10",
+   "body": "Upgrading docker-crunchy to baseimage: ubuntu:25.04",
    "user": "dockserver image update[bot]"
 }
 
