@@ -5,7 +5,7 @@
    "newversion": "2.0.0.1282",
    "appbranch": "nightly",
    "baseimage": "ghcr.io/linuxserver/baseimage-alpine",
-   "baseversion": "3.22-02acf855-ls10",
+   "baseversion": "3.22-a0dc0735-ls11",
    "description": "Whisparr is an adult movie collection manager for Usenet and BitTorrent users.",
    "body": "Upgrading docker-whisparr-nightly to 2.0.0.1282",
    "user": "dockserver image update[bot]"
