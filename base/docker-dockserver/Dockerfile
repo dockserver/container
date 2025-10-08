@@ -16,12 +16,12 @@
 #####################################
 # shellcheck disable=SC2086
 # shellcheck disable=SC2046
-FROM alpine:3.22.1
+FROM alpine:3.22.2
 LABEL org.opencontainers.image.source="https://github.com/dockserver/container"
 
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
-ARG VERSION="3.22.1"
+ARG VERSION="3.22.2"
 
 RUN  \
   echo "**** install packages ****" && \
