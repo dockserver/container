@@ -49,7 +49,7 @@ packaging==25.0
 paginate==0.5.7
 pathspec==0.12.1
 pillow==11.3.0
-platformdirs==4.4.0
+platformdirs==4.5.0
 pycparser==2.23
 pymdown-extensions==10.16.1
 python-dateutil==2.9.0.post0

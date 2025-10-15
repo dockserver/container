@@ -2,7 +2,7 @@ acl-libs-2.3.2-r1
 alpine-baselayout-3.7.0-r0
 alpine-baselayout-data-3.7.0-r0
 alpine-keys-2.5-r0
-alpine-release-3.22.1-r0
+alpine-release-3.22.2-r0
 apk-tools-2.14.9-r3
 bash-5.2.37-r0
 brotli-libs-1.1.0-r2
