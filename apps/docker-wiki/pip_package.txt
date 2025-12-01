@@ -52,7 +52,7 @@ pathspec==0.12.1
 pillow==11.3.0
 platformdirs==4.5.0
 pycparser==2.23
-pymdown-extensions==10.17.1
+pymdown-extensions==10.17.2
 python-dateutil==2.9.0.post0
 pyyaml_env_tag==1.1
 requests==2.32.5
