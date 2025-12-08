@@ -9,7 +9,7 @@ PyYAML==6.0.3
 Pygments==2.19.2
 babel==2.17.0
 backrefs==6.1
-beautifulsoup4==4.14.2
+beautifulsoup4==4.14.3
 bracex==2.6
 cairocffi==1.7.1
 certifi==2025.11.12
