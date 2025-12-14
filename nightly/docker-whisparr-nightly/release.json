@@ -2,11 +2,11 @@
    "appname": "docker-whisparr-nightly",
    "apppic": "./images/docker-whisparr-nightly.png",
    "appfolder": "./nightly/docker-whisparr-nightly",
-   "newversion": "2.0.0.1698",
+   "newversion": "2.0.0.1704",
    "appbranch": "nightly",
    "baseimage": "ghcr.io/linuxserver/baseimage-alpine",
    "baseversion": "3.23-6580b7f6-ls2",
    "description": "Whisparr is an adult movie collection manager for Usenet and BitTorrent users.",
-   "body": "Upgrading docker-whisparr-nightly to 2.0.0.1698",
+   "body": "Upgrading docker-whisparr-nightly to 2.0.0.1704",
    "user": "dockserver image update[bot]"
 }
