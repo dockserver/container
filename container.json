@@ -200,7 +200,7 @@ base alpine
    "appfolder": "./base/alpine",
    "newversion": "3.23.0",
    "baseimage": "alpine",
-   "description": "Official Alpine Linux Docker image. Win at minimalism!",
+   "description": "",
    "body": "Upgrading alpine to 3.23.0",
    "user": "github-actions[bot]"
 }
