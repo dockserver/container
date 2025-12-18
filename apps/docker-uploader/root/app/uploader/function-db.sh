@@ -343,7 +343,30 @@ function rcloneupload() {
    checkerror
    #### ECHO END-PARTS FOR UI READING ####
    $(which find) "${DLFOLDER}/${SETDIR}" -mindepth 1 -type d -empty -delete &>/dev/null
-   sqlite3write "INSERT INTO completed_uploads (drive,filedir,filebase,filesize,gdsa,starttime,endtime,status,error) VALUES ('${DRIVE//\'/\'\'}','${DIR//\'/\'\'}','${FILE//\'/\'\'}','${SIZE}','${REMOTENAME//\'/\'\'}','${STARTZ}','${ENDZ}','${STATUS//\'/\'\'}','${ERROR//\'/\'\'}'); DELETE FROM uploads WHERE filebase = '${FILE//\'/\'\'}';" &>/dev/null
+   
+   # Make sure SIZEBYTES contains the actual size in bytes for storage
+   if [[ -z "${SIZEBYTES}" || "${SIZEBYTES}" == "0" ]]; then
+      # If SIZEBYTES is empty or zero, try to derive it from SIZE
+      if [[ "${SIZE}" =~ ^([0-9.]+)\ ?([KMGT]i?B) ]]; then
+         NUM=${BASH_REMATCH[1]}
+         UNIT=${BASH_REMATCH[2]}
+         case "${UNIT}" in
+            B) SIZEBYTES=$(echo "${NUM}" | awk '{printf "%d", $1}') ;;
+            KB|KiB) SIZEBYTES=$(echo "${NUM}" | awk '{printf "%d", $1 * 1024}') ;;
+            MB|MiB) SIZEBYTES=$(echo "${NUM}" | awk '{printf "%d", $1 * 1024 * 1024}') ;;
+            GB|GiB) SIZEBYTES=$(echo "${NUM}" | awk '{printf "%d", $1 * 1024 * 1024 * 1024}') ;;
+            TB|TiB) SIZEBYTES=$(echo "${NUM}" | awk '{printf "%d", $1 * 1024 * 1024 * 1024 * 1024}') ;;
+            *) SIZEBYTES=0 ;;
+         esac
+      else
+         # Default to zero if we can't parse
+         SIZEBYTES=0
+      fi
+   fi
+   
+   # Insert into completed_uploads with the filesize_bytes field
+   sqlite3write "INSERT INTO completed_uploads (drive,filedir,filebase,filesize,filesize_bytes,gdsa,starttime,endtime,status,error) VALUES (\"${DRIVE}\",\"${DIR}\",\"${FILE}\",\"${SIZE}\",\"${SIZEBYTES}\",\"${REMOTENAME}\",\"${STARTZ}\",\"${ENDZ}\",\"${STATUS}\",\"${ERROR}\"); DELETE FROM uploads WHERE filebase = \"${FILE}\";" &>/dev/null
+   
    #### END OF MOVE ####
    $(which rm) -rf "${LOGFILE}/${FILE}.txt" &>/dev/null
    #### REMOVE CUSTOM RCLONE.CONF ####
@@ -367,14 +390,13 @@ function listfiles() {
       LISTSIZE=$($(which stat) -c %s "${DLFOLDER}/${NAME}" 2>/dev/null)
       LISTTYPE="${NAME##*.}"
       if [[ "${LISTTYPE}" == "mkv" ]] || [[ "${LISTTYPE}" == "mp4" ]] || [[ "${LISTTYPE}" == "avi" ]] || [[ "${LISTTYPE}" == "mov" ]] || [[ "${LISTTYPE}" == "mpeg" ]] || [[ "${LISTTYPE}" == "mpegts" ]] || [[ "${LISTTYPE}" == "ts" ]]; then
-         CHECKMETA=$($(which exiftool) -m -q -q -Title "${DLFOLDER}/${NAME}" 2>/dev/null | $(which grep) -qE '[A-Za-z]' && echo 1 || echo 0)
+         CHECKMETA=$($(which exiftool) -m -q -q -Title "${DLFOLDER}/${NAME}" 2>/dev/null | $(which grep) -qE * && echo 1 || echo 0)
       else
          CHECKMETA="0"
       fi
       if [[ "${STRIPARR_URL}" == "" ]]; then
          STRIPARR_URL="null"
       fi
-      
       if [[ "${STRIPARR_URL}" == "null" ]]; then
          sqlite3write "INSERT OR IGNORE INTO upload_queue (drive,filedir,filebase,filesize,metadata) SELECT '${LISTDRIVE//\'/\'\'}','${LISTDIR//\'/\'\'}','${LISTFILE//\'/\'\'}','${LISTSIZE}','0' WHERE NOT EXISTS (SELECT 1 FROM uploads WHERE filebase = '${LISTFILE//\'/\'\'}');" &>/dev/null
       else
