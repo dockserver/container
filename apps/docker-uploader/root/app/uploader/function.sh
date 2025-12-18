@@ -13,6 +13,13 @@
 #####################################
 source /system/uploader/uploader.env
 #SETTINGS
+ENVA=/system/uploader/uploader.env
+CSV=/system/servicekeys/uploader.csv
+EXCLUDE=/system/uploader/rclone.exclude
+ENDCONFIG=/app/rclone/rclone.conf
+DATABASE=/system/uploader/db/uploader.db
+PAUSE=/app/rclone/pause
+TEMPFILES=/app/rclone/files.txt
 
 #FOLDER
 BASE=/system/uploader
