@@ -52,7 +52,7 @@ pathspec==0.12.1
 pillow==11.3.0
 platformdirs==4.5.1
 pycparser==2.23
-pymdown-extensions==10.18
+pymdown-extensions==10.19.1
 python-dateutil==2.9.0.post0
 pyyaml_env_tag==1.1
 requests==2.32.5
@@ -63,7 +63,7 @@ super_collections==0.6.2
 termcolor==3.2.0
 tinycss2==1.4.0
 typing_extensions==4.15.0
-urllib3==2.6.0
+urllib3==2.6.2
 watchdog==6.0.0
 wcmatch==10.1
 webencodings==0.5.1
