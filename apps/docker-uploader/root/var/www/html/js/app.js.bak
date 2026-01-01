@@ -13,15 +13,12 @@ const uploaderApp = {
   completedTodaySize: 0,
   // Store env settings loaded from the API
   envSettings: {},
-  // Current filter in history section
-  historyFilter: "all",
   // Interval IDs for periodic updates
   intervals: {
     inProgress: null,
     completed: null,
     stats: null,
     queue: null,
-    failedCount: null,
   },
 };
 
@@ -38,9 +35,6 @@ $(document).ready(function () {
 
   // Setup event listeners
   setupEventListeners();
-
-  // Initialize styled selects in settings
-  initStyledSelects();
 
   // Start periodic updates
   startPeriodicUpdates();
@@ -66,8 +60,6 @@ function initializeApp() {
   updateRealTimeStats();
   // Load dashboard recent activity
   loadDashboardActivity();
-  // Load failed uploads count
-  updateFailedCount();
 }
 
 /**
@@ -196,30 +188,6 @@ function compareVersions(v1, v2) {
 }
 
 /**
- * Update failed uploads count badge
- */
-function updateFailedCount() {
-  fetch("srv/api/jobs/failed_count.php")
-    .then((response) => response.json())
-    .then((data) => {
-      const count = data.count || 0;
-      const $badge = $("#failed-count-badge");
-      const $badgeCount = $("#failed-badge-count");
-
-      $badgeCount.text(count);
-
-      if (count > 0) {
-        $badge.show();
-      } else {
-        $badge.hide();
-      }
-    })
-    .catch((error) => {
-      console.error("Failed to fetch failed uploads count:", error);
-    });
-}
-
-/**
  * Set up all event listeners
  */
 function setupEventListeners() {
@@ -270,10 +238,10 @@ function setupEventListeners() {
       url: "srv/api/system/clean_history.php",
       success: function () {
         handleCompletedJobList();
-        showToast("Upload history cleared successfully", "success", 2500);
+        showStatusMessage("Upload history cleared successfully");
       },
       error: function () {
-        showToast("Failed to clear upload history", "error", 3000);
+        showStatusMessage("Failed to clear upload history", true);
       },
     });
   });
@@ -289,14 +257,6 @@ function setupEventListeners() {
     $(this).addClass("active");
     uploaderApp.pageSize = parseInt($(this).find("a").text());
     saveUserSetting("pageSize", uploaderApp.pageSize);
-    handleCompletedJobList();
-  });
-
-  // History filter buttons
-  $(".filter-btn").on("click", function () {
-    $(".filter-btn").removeClass("active");
-    $(this).addClass("active");
-    uploaderApp.historyFilter = $(this).data("filter");
     handleCompletedJobList();
   });
 
@@ -379,15 +339,21 @@ function setupSettingsModal() {
  * Special handling for form submissions
  */
 function setupFormSubmissions() {
-  let autoSaveTimeout = null;
+  // Unified settings form submission
+  $("#unified-settings-form").on("submit", function (e) {
+    e.preventDefault();
 
-  function collectFormData($form) {
     const formData = {};
+    const $form = $(this);
+
+    // Get all form inputs including checkboxes
     $form.find("input, select, textarea").each(function () {
       const $input = $(this);
       const name = $input.attr("name");
+
       if (name) {
         if ($input.is(":checkbox")) {
+          // For toggle switches, convert to "true"/"false" strings
           formData[name.toUpperCase()] = $input.is(":checked")
             ? "true"
             : "false";
@@ -396,120 +362,11 @@ function setupFormSubmissions() {
         }
       }
     });
-    return formData;
-  }
 
-  function showAutoSaveIndicator() {
-    showToast("Settings auto-saved successfully", "success", 2500);
-  }
-
-  $("#unified-settings-form").on(
-    "change",
-    "input, select, textarea",
-    function () {
-      const $form = $("#unified-settings-form");
-      if (autoSaveTimeout) clearTimeout(autoSaveTimeout);
-      autoSaveTimeout = setTimeout(() => {
-        const formData = collectFormData($form);
-        console.log("Auto-saving settings:", formData);
-        $.ajax({
-          url: "srv/api/system/update_env.php",
-          method: "POST",
-          data: JSON.stringify(formData),
-          contentType: "application/json",
-          success: function (response) {
-            console.log("Auto-save successful:", response);
-            showAutoSaveIndicator();
-          },
-          error: function (xhr, status, error) {
-            console.error("Auto-save failed:", error);
-          },
-        });
-      }, 1000);
-    }
-  );
-
-  $("#unified-settings-form").on("submit", function (e) {
-    e.preventDefault();
-    const $form = $(this);
-    const formData = collectFormData($form);
     console.log("Submitting unified settings:", formData);
+
+    // Update environment file with all settings at once
     updateEnvSettings("unified-settings-form", formData);
-  });
-}
-
-/**
- * Initialize styled selects in the settings form using a dropdown
- * layout similar to the theme selector. Keeps the original select hidden
- * and syncs value changes to trigger auto-save.
- */
-function initStyledSelects() {
-  const $form = $("#unified-settings-form");
-  if ($form.length === 0) return;
-
-  // Enhance each select with a styled dropdown
-  $form.find(".form-group select").each(function () {
-    const $select = $(this);
-    if ($select.data("styled")) return; // avoid double init
-
-    // Build dropdown structure
-    const currentText = $select.find("option:selected").text();
-    const $dropdown = $(`
-      <div class="settings-dropdown">
-        <button type="button" class="settings-select-btn" aria-haspopup="listbox" aria-expanded="false">
-          <span class="selected-text"></span>
-          <i class="fas fa-chevron-down"></i>
-        </button>
-        <div class="settings-dropdown-menu" role="listbox"></div>
-      </div>
-    `);
-
-    $dropdown.find(".selected-text").text(currentText);
-
-    const $menu = $dropdown.find(".settings-dropdown-menu");
-    $select.find("option").each(function () {
-      const value = $(this).attr("value");
-      const label = $(this).text();
-      const isSelected = $(this).is(":selected");
-      const $item = $(
-        `<div class="settings-dropdown-item" role="option" data-value="${value}">${label}</div>`
-      );
-      if (isSelected) $item.addClass("active");
-      $menu.append($item);
-    });
-
-    // Hide original select and insert dropdown after it
-    $select.hide().after($dropdown);
-    $select.data("styled", true);
-
-    // Toggle menu
-    const $btn = $dropdown.find(".settings-select-btn");
-    $btn.on("click", function (e) {
-      e.stopPropagation();
-      const expanded = $(this).attr("aria-expanded") === "true";
-      $(this).attr("aria-expanded", expanded ? "false" : "true");
-      $menu.toggleClass("active", !expanded);
-    });
-
-    // Close when clicking outside
-    $(document).on("click", function () {
-      $menu.removeClass("active");
-      $btn.attr("aria-expanded", "false");
-    });
-
-    // Select item
-    $menu.on("click", ".settings-dropdown-item", function (e) {
-      e.stopPropagation();
-      const value = $(this).data("value");
-      const label = $(this).text();
-      $menu.find(".settings-dropdown-item").removeClass("active");
-      $(this).addClass("active");
-      $dropdown.find(".selected-text").text(label);
-      $menu.removeClass("active");
-      $btn.attr("aria-expanded", "false");
-      // Update original select and trigger change for auto-save
-      $select.val(value).trigger("change");
-    });
   });
 }
 
@@ -549,7 +406,7 @@ function handleInProgressJobs() {
 
     if (!json.jobs || json.jobs.length === 0) {
       $tableBody.append(
-        '<tr><td colspan="8" class="no-uploads-message text-center">No uploads in progress</td></tr>'
+        '<tr><td colspan="7" class="no-uploads-message text-center">No uploads in progress</td></tr>'
       );
       $("#download_rate").text("0.00");
       $("#current-rate").text("0.00 MB/s");
@@ -601,12 +458,6 @@ function handleInProgressJobs() {
       // Fill in the data
       rowNode.querySelector(".file-name").textContent = data.file_name;
       rowNode.querySelector(".folder-name").textContent = data.drive;
-      // Remove folder prefix from directory path
-      let directory = data.file_directory || "N/A";
-      if (data.drive && directory.startsWith(data.drive + "/")) {
-        directory = directory.substring(data.drive.length + 1);
-      }
-      rowNode.querySelector(".directory-name").textContent = directory;
       rowNode.querySelector(".key-name").textContent = data.gdsa;
       rowNode.querySelector(".progress-percentage").textContent =
         data.upload_percentage;
@@ -631,7 +482,7 @@ function handleInProgressJobs() {
       const uploadSpeedEl = rowNode.querySelector(".upload-speed");
 
       timeRemainingEl.textContent = data.upload_remainingtime;
-      uploadSpeedEl.textContent = data.upload_speed;
+      uploadSpeedEl.innerHTML = `<i class="fas fa-tachometer-alt"></i> ${data.upload_speed}`;
 
       // Add a color class based on upload speed
       if (uploadRateNumeric < 5) {
@@ -648,28 +499,23 @@ function handleInProgressJobs() {
 
     // Update the upload rate display
     totalUploadRate = totalUploadRate.toFixed(2);
+    $("#download_rate").text(totalUploadRate);
     $("#current-rate").text(`${totalUploadRate} MB/s`);
-    $("#overview-rate").text(`${totalUploadRate} MB/s`);
     $("#active-count-badge").text(json.jobs.length);
 
-    // Store the rate for other functions to access
-    uploaderApp.currentUploadRate = totalUploadRate;
-
-    // Color-code the upload rate based on speed (if element exists)
-    if ($("#download_rate").length > 0) {
-      if (totalUploadRate < 5) {
-        $("#download_rate")
-          .removeClass("bg-success bg-warning")
-          .addClass("bg-danger");
-      } else if (totalUploadRate < 10) {
-        $("#download_rate")
-          .removeClass("bg-success bg-danger")
-          .addClass("bg-warning");
-      } else {
-        $("#download_rate")
-          .removeClass("bg-warning bg-danger")
-          .addClass("bg-success");
-      }
+    // Color-code the upload rate based on speed
+    if (totalUploadRate < 5) {
+      $("#download_rate")
+        .removeClass("bg-success bg-warning")
+        .addClass("bg-danger");
+    } else if (totalUploadRate < 10) {
+      $("#download_rate")
+        .removeClass("bg-success bg-danger")
+        .addClass("bg-warning");
+    } else {
+      $("#download_rate")
+        .removeClass("bg-warning bg-danger")
+        .addClass("bg-success");
     }
   });
 }
@@ -685,15 +531,9 @@ function handleCompletedJobList() {
   $("#pageSize > li.page-item").removeClass("active");
   $(`#pageSize > li.page-item:contains("${savedPageSize}")`).addClass("active");
 
-  // Determine which API endpoint to use based on filter
-  let apiEndpoint = "srv/api/jobs/completed.php";
-  if (uploaderApp.historyFilter === "failed") {
-    apiEndpoint = "srv/api/jobs/failed.php";
-  }
-
   // Initialize pagination
   $("#page").pagination({
-    dataSource: apiEndpoint,
+    dataSource: "srv/api/jobs/completed.php",
     locator: "jobs",
     ulClassName: "pagination pagination-sm",
     totalNumberLocator: function (response) {
@@ -720,8 +560,6 @@ function handleCompletedJobList() {
     afterPaging: function () {
       // After page changes, fetch complete upload stats for today
       fetchCompletedTodayStats();
-      // Also update failed count
-      updateFailedCount();
     },
     callback: function (data, pagination) {
       // Add Bootstrap classes to pagination links
@@ -731,12 +569,8 @@ function handleCompletedJobList() {
       $completedTableBody.empty();
 
       if (!data || data.length === 0) {
-        const message =
-          uploaderApp.historyFilter === "failed"
-            ? "No failed uploads"
-            : "No completed uploads";
         $completedTableBody.append(
-          `<tr><td colspan="7" class="no-uploads-message text-center">${message}</td></tr>`
+          '<tr><td colspan="6" class="no-uploads-message text-center">No completed uploads</td></tr>'
         );
         $("#clnHist").hide();
         return;
@@ -752,11 +586,6 @@ function handleCompletedJobList() {
           ? job.time_end
           : job.time_end_clean;
         const rowClass = job.successful === true ? "" : "table-danger";
-        // Remove folder prefix from directory path
-        let directory = job.file_directory || "N/A";
-        if (job.drive && directory.startsWith(job.drive + "/")) {
-          directory = directory.substring(job.drive.length + 1);
-        }
 
         const row = $("<tr>").addClass(rowClass);
         row.append(
@@ -766,12 +595,6 @@ function handleCompletedJobList() {
             .text(job.file_name)
         );
         row.append($("<td>").attr("data-title", "Folder").text(job.drive));
-        row.append(
-          $("<td>")
-            .attr("data-title", "Directory")
-            .addClass("truncate")
-            .text(directory)
-        );
         row.append($("<td>").attr("data-title", "Key").text(job.gdsa));
         row.append(
           $("<td>").attr("data-title", "Filesize").text(job.file_size)
@@ -781,15 +604,7 @@ function handleCompletedJobList() {
             .attr("data-title", "Time spent")
             .text(job.time_elapsed || "n/a")
         );
-
-        // Show error message in tooltip for failed uploads
-        let uploadedCell = $("<td>")
-          .attr("data-title", "Uploaded")
-          .text(endTime);
-        if (!job.successful && job.error_message) {
-          uploadedCell.attr("title", job.error_message).addClass("has-error");
-        }
-        row.append(uploadedCell);
+        row.append($("<td>").attr("data-title", "Uploaded").text(endTime));
 
         $completedTableBody.append(row);
       });
@@ -893,19 +708,18 @@ function handleQueueList() {
           .text(file.drive || "N/A")
       );
 
-      // Directory (hidden on mobile) - remove folder prefix
-      let directory = file.filedir || "/";
-      if (file.drive && directory.startsWith(file.drive + "/")) {
-        directory = directory.substring(file.drive.length + 1);
-      }
+      // Directory (hidden on mobile)
       row.append(
-        $("<td>").addClass("d-none d-lg-table-cell truncate").text(directory)
+        $("<td>")
+          .addClass("d-none d-lg-table-cell truncate")
+          .text(file.filedir || "/")
       );
 
-      // Filesize (hidden on mobile) - format the size
-      const formattedSize = formatFileSize(parseFileSize(file.filesize));
+      // Filesize (hidden on mobile)
       row.append(
-        $("<td>").addClass("d-none d-lg-table-cell").text(formattedSize)
+        $("<td>")
+          .addClass("d-none d-lg-table-cell")
+          .text(file.filesize || "N/A")
       );
 
       // Added time
@@ -974,7 +788,7 @@ function alignPauseControl(status, fromUserAction = false) {
     $control.attr("aria-label", "Pause uploads");
 
     if (fromUserAction) {
-      showToast("Uploader is running", "success");
+      showStatusMessage("Uploader is running");
       updateStatusIndicator("active", "Active");
     }
   } else if (status === "STOPPED") {
@@ -985,7 +799,7 @@ function alignPauseControl(status, fromUserAction = false) {
     $control.attr("aria-label", "Resume uploads");
 
     if (fromUserAction) {
-      showToast("Uploader is paused", "warning");
+      showStatusMessage("Uploader is paused");
       updateStatusIndicator("paused", "Paused");
     }
   }
@@ -1052,9 +866,9 @@ function setupPauseControl() {
       error: function (xhr, status, error) {
         console.error("Failed to update status:", error);
         console.log("Response:", xhr.responseText);
-        showToast(
+        showStatusMessage(
           "Failed to update status. Check console for details.",
-          "error"
+          true
         );
       },
       complete: function () {
@@ -1073,11 +887,9 @@ function setupPauseControl() {
 
 // Update the updateRealTimeStats function
 function updateRealTimeStats() {
-  // Get current upload rate from the app state or current-rate element
-  const currentRate =
-    uploaderApp.currentUploadRate || parseFloat($("#current-rate").text()) || 0;
-  const currentRateStr =
-    typeof currentRate === "number" ? currentRate.toFixed(2) : currentRate;
+  // Get current upload rate
+  const currentRate = $("#download_rate").text() || "0.00";
+  $("#current-rate").text(`${currentRate} MB/s`);
 
   // Update rate progress bar
   const bandwidthLimit = parseFloat(
@@ -1085,7 +897,7 @@ function updateRealTimeStats() {
       $("#bandwidth_limit").val() ||
       "30"
   );
-  const rateValue = parseFloat(currentRateStr);
+  const rateValue = parseFloat(currentRate);
   const ratePercentage = Math.min((rateValue / bandwidthLimit) * 100, 100);
   $("#rate-progress .progress-bar-mini").css("width", ratePercentage + "%");
 
@@ -1099,6 +911,7 @@ function updateRealTimeStats() {
 
   // Update overview cards
   $("#overview-active").text(activeUploads);
+  $("#overview-rate").text(`${currentRate} MB/s`);
 
   // Update queue stats separately - don't use active uploads count
   updateQueueStats();
@@ -1144,46 +957,29 @@ function updateSystemOverview() {
           const $statusIcon = $("#system-status-icon");
           const $statusIconI = $statusIcon.find("i");
 
-          // Check if there are active uploads
-          const activeUploads =
-            $("#uploadsTable tbody tr").not(':contains("No uploads")').length ||
-            0;
-
           // Remove all color classes
-          $statusValue.removeClass(
-            "value-green value-red value-orange value-blue"
-          );
+          $statusValue.removeClass("value-green value-red value-orange");
           $statusIcon.removeClass(
-            "gradient-green gradient-red gradient-orange gradient-blue"
+            "gradient-green gradient-red gradient-orange"
           );
 
           if (data.status === "STARTED") {
-            if (activeUploads > 0) {
-              // Uploading state - green with arrow-up icon
-              $statusValue.text("Uploading").addClass("value-green");
-              $statusIcon.addClass("gradient-green");
-              $statusIconI
-                .removeClass("fa-times-circle fa-pause-circle fa-check-circle")
-                .addClass("fa-arrow-up");
-            } else {
-              // Online but idle - green with check-circle icon
-              $statusValue.text("Online").addClass("value-green");
-              $statusIcon.addClass("gradient-green");
-              $statusIconI
-                .removeClass("fa-times-circle fa-pause-circle fa-arrow-up")
-                .addClass("fa-check-circle");
-            }
+            $statusValue.text("Online").addClass("value-green");
+            $statusIcon.addClass("gradient-green");
+            $statusIconI
+              .removeClass("fa-times-circle fa-pause-circle")
+              .addClass("fa-check-circle");
           } else if (data.status === "STOPPED") {
             $statusValue.text("Stopped").addClass("value-orange");
             $statusIcon.addClass("gradient-orange");
             $statusIconI
-              .removeClass("fa-check-circle fa-times-circle fa-arrow-up")
+              .removeClass("fa-check-circle fa-times-circle")
               .addClass("fa-pause-circle");
           } else {
             $statusValue.text("Offline").addClass("value-red");
             $statusIcon.addClass("gradient-red");
             $statusIconI
-              .removeClass("fa-check-circle fa-pause-circle fa-arrow-up")
+              .removeClass("fa-check-circle fa-pause-circle")
               .addClass("fa-times-circle");
           }
         }
@@ -1291,24 +1087,10 @@ function populateFormFields(settings) {
     if ($field.length) {
       if ($field.is("select")) {
         $field.val(value.toString());
-        // If this select is styled, sync the visible dropdown text and active item
-        const $dropdown = $field.next(".settings-dropdown");
-        if ($dropdown.length) {
-          const label = $field.find(`option[value="${value}"]`).text() || value;
-          $dropdown.find(".selected-text").text(label);
-          const $menu = $dropdown.find(".settings-dropdown-menu");
-          $menu.find(".settings-dropdown-item").removeClass("active");
-          $menu
-            .find(`.settings-dropdown-item[data-value="${value}"]`)
-            .addClass("active");
-        }
       } else if ($field.is(":checkbox")) {
         $field.prop("checked", value === true || value === "true");
       } else {
-        // Strip quotes from string values like "null"
-        const cleanVal =
-          typeof value === "string" ? value.replace(/"/g, "") : value;
-        $field.val(cleanVal);
+        $field.val(value);
       }
     }
   });
@@ -1332,22 +1114,6 @@ function updateUIFromSettings(settings) {
     const cleanBwLimit = bwLimit.replace(/"/g, "");
     $("#rate-limit").text(`Limit per Transfer: ${cleanBwLimit}`);
   }
-
-  // Refresh styled selects to reflect updated values
-  $("#unified-settings-form select").each(function () {
-    const $select = $(this);
-    const $dropdown = $select.next(".settings-dropdown");
-    if ($dropdown.length) {
-      const value = $select.val();
-      const label = $select.find(`option[value="${value}"]`).text() || value;
-      $dropdown.find(".selected-text").text(label);
-      const $menu = $dropdown.find(".settings-dropdown-menu");
-      $menu.find(".settings-dropdown-item").removeClass("active");
-      $menu
-        .find(`.settings-dropdown-item[data-value="${value}"]`)
-        .addClass("active");
-    }
-  });
 }
 
 /**
@@ -1393,7 +1159,7 @@ function updateEnvSettings(formId, settings) {
       console.log("API response:", response);
 
       if (response.success) {
-        showToast("Settings updated successfully!", "success");
+        showStatusMessage("Settings updated successfully!");
 
         // Update local settings
         Object.assign(uploaderApp.envSettings, settings);
@@ -1433,10 +1199,10 @@ function updateEnvSettings(formId, settings) {
           originalText,
           function (success) {
             if (!success) {
-              showToast(
+              showStatusMessage(
                 "Failed to update settings: " +
                   (response.message || "Unknown error"),
-                "error"
+                true
               );
             }
           }
@@ -1453,7 +1219,7 @@ function updateEnvSettings(formId, settings) {
         originalText,
         function (success) {
           if (!success) {
-            showToast("Failed to communicate with the server", "error", 3000);
+            showStatusMessage("Failed to communicate with the server", true);
             console.error("Response:", xhr.responseText);
           }
         }
@@ -1498,7 +1264,7 @@ function updateEnvSettingsLegacy(
     dataType: "json",
     success: function (response) {
       if (response.success) {
-        showToast("Settings updated successfully!", "success");
+        showStatusMessage("Settings updated successfully!");
 
         // Update local settings
         Object.assign(uploaderApp.envSettings, settings);
@@ -1588,30 +1354,21 @@ function loadDashboardQueue() {
 
     if (!data.files || data.files.length === 0) {
       $tbody.append(
-        '<tr><td colspan="6" class="text-center">No files in queue</td></tr>'
+        '<tr><td colspan="5" class="text-center">No files in queue</td></tr>'
       );
       return;
     }
 
     // Show only latest 5 items
     const files = data.files.slice(0, 5);
-    files.forEach(function (file, index) {
+    files.forEach(function (file) {
       const size = formatFileSize(parseFileSize(file.filesize));
-      // Remove folder prefix from directory path
-      let directory = file.filedir || "/";
-      if (file.drive && directory.startsWith(file.drive + "/")) {
-        directory = directory.substring(file.drive.length + 1);
-      }
-      // Format the added time properly
-      const time = file.created_at
-        ? formatRelativeTime(file.created_at)
-        : "N/A";
+      const time = formatRelativeTime(file.created_at);
       const $row = $(`
         <tr>
-          <td>${index + 1}</td>
           <td class="truncate">${escapeHtml(file.filename)}</td>
           <td>${escapeHtml(file.drive || "N/A")}</td>
-          <td class="truncate">${escapeHtml(directory)}</td>
+          <td class="truncate">${escapeHtml(file.filedir || "")}</td>
           <td>${size}</td>
           <td>${time}</td>
         </tr>
@@ -1620,7 +1377,7 @@ function loadDashboardQueue() {
     });
   }).fail(function () {
     $("#dashboard-queue-table tbody").html(
-      '<tr><td colspan="6" class="text-center">Failed to load queue</td></tr>'
+      '<tr><td colspan="5" class="text-center">Failed to load queue</td></tr>'
     );
   });
 }
@@ -1635,7 +1392,7 @@ function loadDashboardActive() {
 
     if (!data.jobs || data.jobs.length === 0) {
       $tbody.append(
-        '<tr><td colspan="8" class="text-center">No active uploads</td></tr>'
+        '<tr><td colspan="6" class="text-center">No active uploads</td></tr>'
       );
       return;
     }
@@ -1643,15 +1400,9 @@ function loadDashboardActive() {
     // Show only latest 5 items
     const jobs = data.jobs.slice(0, 5);
     jobs.forEach(function (job) {
-      const size = job.file_size || "N/A";
+      const size = formatFileSize(parseFileSize(job.file_size));
       const progress = parseInt(job.upload_percentage) || 0;
       const speed = job.upload_speed || "0 MB/s";
-      const timeLeft = job.upload_remainingtime || "N/A";
-      // Remove folder prefix from directory path
-      let directory = job.file_directory || "N/A";
-      if (job.drive && directory.startsWith(job.drive + "/")) {
-        directory = directory.substring(job.drive.length + 1);
-      }
 
       const $row = $(`
         <tr>
@@ -1659,8 +1410,7 @@ function loadDashboardActive() {
             job.file_name || job.job_name || "Unknown"
           )}</td>
           <td>${escapeHtml(job.drive || "N/A")}</td>
-          <td class="truncate">${escapeHtml(directory)}</td>
-          <td>${escapeHtml(job.gdsa || "N/A")}</td>
+          <td class="truncate">${escapeHtml(job.file_directory || "N/A")}</td>
           <td>
             <div class="progress-container">
               <div class="progress-info">
@@ -1672,7 +1422,6 @@ function loadDashboardActive() {
             </div>
           </td>
           <td>${size}</td>
-          <td>${timeLeft}</td>
           <td>${speed}</td>
         </tr>
       `);
@@ -1680,7 +1429,7 @@ function loadDashboardActive() {
     });
   }).fail(function () {
     $("#dashboard-active-table tbody").html(
-      '<tr><td colspan="8" class="text-center">Failed to load active uploads</td></tr>'
+      '<tr><td colspan="6" class="text-center">Failed to load active uploads</td></tr>'
     );
   });
 }
@@ -1695,7 +1444,7 @@ function loadDashboardHistory() {
 
     if (!data.jobs || data.jobs.length === 0) {
       $tbody.append(
-        '<tr><td colspan="7" class="text-center">No upload history</td></tr>'
+        '<tr><td colspan="4" class="text-center">No upload history</td></tr>'
       );
       return;
     }
@@ -1704,30 +1453,21 @@ function loadDashboardHistory() {
     const jobs = data.jobs.slice(0, 5);
     jobs.forEach(function (job) {
       const size = job.file_size || "N/A";
-      const timeSpent = job.time_elapsed || "N/A";
-      const uploaded = job.time_end_clean || "N/A";
-      // Remove folder prefix from directory path
-      let directory = job.file_directory || "N/A";
-      if (job.drive && directory.startsWith(job.drive + "/")) {
-        directory = directory.substring(job.drive.length + 1);
-      }
+      const time = job.time_end_clean || "N/A";
 
       const $row = $(`
         <tr>
           <td class="truncate">${escapeHtml(job.file_name || "")}</td>
           <td>${escapeHtml(job.drive || "N/A")}</td>
-          <td class="truncate">${escapeHtml(directory)}</td>
-          <td>${escapeHtml(job.gdsa || "N/A")}</td>
           <td>${size}</td>
-          <td>${timeSpent}</td>
-          <td>${uploaded}</td>
+          <td>${time}</td>
         </tr>
       `);
       $tbody.append($row);
     });
   }).fail(function () {
     $("#dashboard-history-table tbody").html(
-      '<tr><td colspan="7" class="text-center">Failed to load history</td></tr>'
+      '<tr><td colspan="4" class="text-center">Failed to load history</td></tr>'
     );
   });
 }
