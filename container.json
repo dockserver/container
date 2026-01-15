@@ -39,11 +39,11 @@ apps docker-crunchydl
    "appname": "docker-crunchydl",
    "apppic": "./images/docker-crunchydl.png",
    "appfolder": "./apps/docker-crunchydl",
-   "newversion": "null",
+   "newversion": "",
    "appbranch": "master",
    "baseimage": "alpine:latest",
    "description": "Docker Container for crunchyroll download client",
-   "body": "Upgrading docker-crunchydl to null",
+   "body": "Upgrading docker-crunchydl to ",
    "user": "dockserver-image[bot]"
 }
 
