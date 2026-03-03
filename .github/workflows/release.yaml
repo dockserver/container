@@ -150,7 +150,7 @@ jobs:
     - name: Extract Docker metadata
       if: ${{ steps.prep.outputs.version != '' }}
       id: meta
-      uses: docker/metadata-action@a60f0f62b5c12316066c8db464bfb2faafd7907b
+      uses: docker/metadata-action@cb50be45084dde2f4465550fdd9e0abf61483be1
       with:
         images: ${{ secrets.DOCKER_REGISTRY }}/${{ github.repository_owner }}/${{ matrix.container }}
 
