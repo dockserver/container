@@ -5,7 +5,7 @@ charset-normalizer==3.4.6
 idna==3.11
 packaging==26.0
 python-dateutil==2.8.1
-remi @ git+https://github.com/rawpython/remi.git@835a17e6bea04753fe85c31c5d240c75cbf868a1
-requests==2.32.5
+remi @ git+https://github.com/rawpython/remi.git@0cdcf9f6b57269e69fb6a5b8f84d3df775110197
+requests==2.33.0
 six==1.17.0
 urllib3==2.6.3
