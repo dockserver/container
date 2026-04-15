@@ -14,8 +14,8 @@ bracex==2.6
 cairocffi==1.7.1
 certifi==2026.2.25
 cffi==2.0.0
-charset-normalizer==3.4.6
-click==8.3.1
+charset-normalizer==3.4.7
+click==8.3.2
 colorama==0.4.6
 csscompressor==0.9.5
 cssselect2==0.9.0
