@@ -2,8 +2,8 @@ PlexAPI==4.2.0
 certifi==2026.2.25
 charset-normalizer==3.4.7
 idna==3.11
-packaging==26.0
-pysimplegui==4.60.5.1
+packaging==26.1
+pysimplegui==6.0
 python-dateutil==2.8.1
 remi @ git+https://github.com/rawpython/remi.git@0cdcf9f6b57269e69fb6a5b8f84d3df775110197
 requests==2.33.1
