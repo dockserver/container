@@ -25,7 +25,7 @@ ghp-import==2.1.0
 gitdb==4.0.12
 hjson==3.1.0
 htmlmin2==0.1.13
-idna==3.11
+idna==3.12
 jsbeautifier==1.15.4
 jsmin==3.0.1
 lightgallery==0.5

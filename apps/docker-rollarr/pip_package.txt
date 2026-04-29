@@ -1,7 +1,7 @@
 PlexAPI==4.2.0
 certifi==2026.2.25
 charset-normalizer==3.4.7
-idna==3.11
+idna==3.12
 packaging==26.1
 pysimplegui==6.0
 python-dateutil==2.8.1
