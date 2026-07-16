@@ -2,9 +2,9 @@
    "appname": "docker-rollarr",
    "apppic": "./images/docker-rollarr.png",
    "appfolder": "./apps/docker-rollarr",
-   "newversion": "stonking-20260622",
+   "newversion": "26.10",
    "baseimage": "ubuntu",
    "description": "This is the new and improved Automatic Pre-roll script with a GUI for Plex now called Rollarr!",
-   "body": "Upgrading docker-rollarr to stonking-20260622",
+   "body": "Upgrading docker-rollarr to 26.10",
    "user": "github-actions[bot]"
 }
