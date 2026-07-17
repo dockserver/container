@@ -4,10 +4,10 @@
    "appfolder": "./apps/docker-wiki",
    "appbranch": "master",
    "newversion": "3.24.1",
-   "appversion": "",
-   "wikiversion": "",
+   "appversion": "1.4.74",
+   "wikiversion": "9.7.6",
    "baseimage": "alpine",
-   "description": "",
+   "description": "Docker + Traefik with Authelia and Cloudflare Protection",
    "body": "Upgrading docker-wiki to 3.24.1",
    "user": "github-actions[bot]"
 }

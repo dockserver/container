@@ -4,7 +4,7 @@
    "appfolder": "./apps/docker-dockupdate",
    "newversion": "3.24.1",
    "baseimage": "alpine",
-   "description": "",
+   "description": "null",
    "body": "Upgrading docker-dockupdate to 3.24.1",
    "user": "github-actions[bot]"
 }
