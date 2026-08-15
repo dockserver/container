@@ -1,7 +1,7 @@
 CacheControl==0.14.4
 CairoSVG==2.9.0
 EditorConfig==0.17.1
-GitPython==3.1.57
+GitPython==3.1.58
 Jinja2==3.1.6
 Markdown==3.10.3
 MarkupSafe==3.0.3
@@ -46,11 +46,11 @@ mkdocs-rss-plugin==1.19.0
 mkdocs==1.6.1
 msgpack==1.2.1
 natsort==8.4.0
-packaging==26.2
+packaging==26.3
 paginate==0.5.7
 pathspec==1.1.1
 pillow==12.3.0
-platformdirs==4.11.0
+platformdirs==4.11.1
 properdocs==1.6.7
 pycparser==3.0
 pymdown-extensions==11.0.1
@@ -59,7 +59,7 @@ pyyaml_env_tag==1.1
 requests==2.34.2
 six==1.17.0
 smmap==5.0.3
-soupsieve==2.9.1
+soupsieve==2.9.2
 super_collections==0.6.2
 termcolor==3.3.0
 tinycss2==1.5.1
