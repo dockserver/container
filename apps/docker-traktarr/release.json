@@ -4,7 +4,7 @@
    "appfolder": "./apps/docker-traktarr",
    "newversion": "3.24.2",
    "baseimage": "ghcr.io/linuxserver/baseimage-alpine",
-   "baseversion": "3.24-8a13515c-ls10",
+   "baseversion": "3.24-af321d58-ls11",
    "body": "Upgrading docker-traktarr to ",
    "user": "dockserver image update[bot]"
 }
