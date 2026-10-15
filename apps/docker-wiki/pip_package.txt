@@ -4,7 +4,7 @@ EditorConfig==0.17.1
 GitPython==3.2.0
 Jinja2==3.1.6
 Markdown==3.11
-MarkupSafe==3.0.3
+MarkupSafe==3.0.4
 PyYAML==6.0.3
 Pygments==2.21.0
 babel==2.18.0
@@ -50,7 +50,7 @@ packaging==26.3
 paginate==0.5.7
 pathspec==1.1.1
 pillow==12.3.0
-platformdirs==4.12.2
+platformdirs==4.12.4
 properdocs==1.6.7
 pycparser==3.0
 pymdown-extensions==12.1
