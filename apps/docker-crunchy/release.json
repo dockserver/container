@@ -2,9 +2,9 @@
    "appname": "docker-crunchy",
    "apppic": "./images/docker-crunchy.png",
    "appfolder": "./apps/docker-crunchy",
-   "newversion": "stonking-20261013.1",
+   "newversion": "stonking-20261023.1",
    "baseimage": "ubuntu",
    "description": "Docker image  for docker-crunchy",
-   "body": "Upgrading docker-crunchy to baseimage: ubuntu:stonking-20261013.1",
+   "body": "Upgrading docker-crunchy to baseimage: ubuntu:stonking-20261023.1",
    "user": "dockserver image update[bot]"
 }
