@@ -5,7 +5,7 @@
    "appbranch": "master",
    "newversion": "3.24.4",
    "appversion": "1.4.74",
-   "wikiversion": "9.8.0",
+   "wikiversion": "9.8.1",
    "baseimage": "alpine",
    "description": "Docker + Traefik with Authelia and Cloudflare Protection",
    "body": "Upgrading docker-wiki to 3.24.4",
